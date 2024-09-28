@@ -866,7 +866,7 @@ class FLMS_Module_Groups {
         }
         wp_enqueue_script( 'flms-groups' );
         echo '<div id="flms-group-member-content-container">';
-        echo $this->get_group_member_content($post->ID);
+            echo $this->get_group_member_content($post->ID);
         echo '</div>';
         
     }
