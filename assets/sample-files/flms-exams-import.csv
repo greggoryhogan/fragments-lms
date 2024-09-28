@@ -1,0 +1,3 @@
+ID,Title,Course Name,Associated Content,Version,Exam Order,Post Content,Status,Exam Type,Question Select Type,Exam Questions,Exam Question Categories,Exam Attempts,Question Per Page,Save/Continue Enabled,Exam Review Enabled,Exam is Graded,Exam is Graded Using,Pass Percentage,Pass Points,Exam Attempts Action,Exam Label,Start Exam Label,Resume Exam Label
+,Lesson 2 Exam,Imported Course,Imported Lesson 2,1,0,This is a lesson exam,publish,standard,category,,Import Course Questions,5,10,1,1,graded,percentage,50,100,reset-lesson,Exam,Start Exam,Resume Exam
+,Final Exam for Course,Imported Course,Imported Course,1,0,This is a course exam,publish,standard,category,,Import Course Questions,1,10,1,1,auto,percentage,0,100,reset-lesson,Survey,Start Survey,Resume Survey

@@ -1,0 +1,110 @@
+.flms-question {
+    display: flex;
+    gap: 5px;
+    margin: 20px 0 40px;
+    transition: .2s opacity;
+    opacity: 1;
+    &.is-loading {
+        opacity: .2;
+    }
+    .question-content {
+        flex: 1;
+    }
+    .question-text {
+        margin-bottom: 12px;
+        p {
+            margin-top: 0;
+            padding-top: 0;
+        }
+    }
+    .flms-answer {
+        &.type {
+            &-single-choice,
+            &-multiple-choice,
+            &-assessment {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                flex-direction: column;
+            }
+            &-fill-in-the-blank {
+                div, input {
+                    display: inline;
+                }
+                input {
+                    vertical-align: bottom;
+                    width: auto;
+                    border-top: 0;
+                    border-left: 0;
+                    border-right: 0;
+                    border-bottom: 1px solid;
+                    border-radius: 0;
+                    padding: 3px 5px;
+                }
+            }
+            &-assessment {
+                .answer-option {
+                    display: flex;
+                    gap: 10px;
+                    input {
+                        margin-right: 5px;
+                    }
+                }
+            }
+            &-essay {
+                .wp-editor-tabs {
+                    display: flex;
+                }
+                .wp-editor-wrap {
+                    textarea {
+                        box-sizing: border-box;
+                        border: none;
+                        resize: none; 
+                        width: 100%;
+                    }
+                }
+            }
+        }
+        &.disallow-input {
+            pointer-events: none;
+        }
+    }
+    .question-feedback {
+        margin-top: 8px;
+        .correct {
+            color: #32CD32;
+        }
+        .incorrect {
+            color: #ff0000;
+        }
+    }
+}
+.flms-navigation {
+    display: flex;
+    justify-content: space-between;
+    :only-child {
+        margin-left: auto;
+        &.exam-pagination.previous {
+            margin-left: 0;
+            margin-right: auto;
+        }
+    }
+    .save-and-continue-exam,
+    #complete-review {
+        margin-left: auto;
+        margin-right: 15px;
+        &.last-page {
+            margin-right: 0;
+        }
+    }
+}
+#current-exam {
+    width: 100%;
+    ol {
+        li {
+            &::marker {
+                text-align: left;
+            }
+        }
+    }
+}
