@@ -3,7 +3,7 @@
 Plugin Name:  Fragments LMS
 Plugin URI:	  https://fragmentlms.com
 Description:  Learning management software built for developers, by developers
-Version:	  1.1.10
+Version:	  1.1.11
 Author:		  Fragment
 Author URI:   https://fragmentwebworks.com
 License:      GPL2
@@ -40,8 +40,9 @@ function cyb_activation_redirect( $plugin ) {
     }
 }
 
-add_action('plugins_loaded','load_updater');
-function load_updater() {
+//Include to updater package
+add_action('plugins_loaded','flms_load_updater');
+function flms_load_updater() {
 	require	FLMS_ABSPATH . 'includes/class-flms-updater.php';
 }
 /**
