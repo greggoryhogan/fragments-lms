@@ -6,15 +6,17 @@
  * @version 1.0.0
  */
 
-
+ if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 require dirname( FLMS_PLUGIN_FILE ) . '/assets/library/plugin-update-checker-5.5/plugin-update-checker.php';
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-$myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
+$myUpdateChecker = PucFactory::buildUpdateChecker(
 	'https://github.com/greggoryhogan/fragments-lms/', // GitHub URL of your repo
-	FLMS_PLUGIN_FILE, // Path to your plugin file
+	__FILE__, // Path to your plugin file
 	'fragments-lms' // The plugin slug (unique identifier for your plugin)
 );
 

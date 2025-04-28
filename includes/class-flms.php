@@ -50,7 +50,7 @@ final class FLMS {
 
 		//Updates
 		if(is_admin()) {
-			include_once dirname( FLMS_PLUGIN_FILE ) . '/includes/class-flms.php';
+			require dirname( FLMS_PLUGIN_FILE ) . '/includes/class-flms-updater.php';
 		}
 		
 		//Defaults
