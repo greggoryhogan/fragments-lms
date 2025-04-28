@@ -3,13 +3,12 @@
 Plugin Name:  Fragments LMS
 Plugin URI:	  https://fragmentlms.com
 Description:  Learning management software built for developers, by developers
-Version:	  1.1.9
+Version:	  1.1.10
 Author:		  Fragment
 Author URI:   https://fragmentwebworks.com
 License:      GPL2
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  flms
-GitHub Plugin URI: greggoryhogan/fragments-lms
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,6 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! defined( 'FLMS_PLUGIN_FILE' ) ) {
 	define( 'FLMS_PLUGIN_FILE', __FILE__ );
+}
+if ( ! defined( 'FLMS_PLUGIN_PATH' ) ) {
+	define( 'FLMS_PLUGIN_PATH', __FILE__);
 }
 
 // Include the main WooCommerce class.
@@ -36,6 +38,11 @@ function cyb_activation_redirect( $plugin ) {
         wp_redirect(admin_url('admin.php?page=flms-setup'));
 		exit;
     }
+}
+
+add_action('plugins_loaded','load_updater');
+function load_updater() {
+	require	FLMS_ABSPATH . 'includes/class-flms-updater.php';
 }
 /**
  * Add option to flush permalinks on activation

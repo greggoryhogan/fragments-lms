@@ -41,6 +41,7 @@ final class FLMS {
         $this->define( 'FLMS_ABSPATH', dirname( FLMS_PLUGIN_FILE ) . '/' );
 		$this->define( 'FLMS_PLUGIN_URL', plugin_dir_url( FLMS_PLUGIN_FILE ));
 		$this->define( 'FLMS_PLUGIN_SLUG', 'fragment-lms' );
+		
     }
 
     private function includes() {
@@ -48,11 +49,6 @@ final class FLMS {
         //Class autoloader
         include_once FLMS_ABSPATH . 'includes/class-flms-autoloader.php';
 
-		//Updates
-		if(is_admin()) {
-			require dirname( FLMS_PLUGIN_FILE ) . '/includes/class-flms-updater.php';
-		}
-		
 		//Defaults
 		include_once FLMS_ABSPATH . 'includes/global.php';
 		
@@ -404,6 +400,8 @@ final class FLMS {
 		}
 
 	}
+
+	
 
 }
 new FLMS();

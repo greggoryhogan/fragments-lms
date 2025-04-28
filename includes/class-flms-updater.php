@@ -16,8 +16,8 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
 	'https://github.com/greggoryhogan/fragments-lms/', // GitHub URL of your repo
-	__FILE__, // Path to your plugin file
-	'fragments-lms' // The plugin slug (unique identifier for your plugin)
+	FLMS_PLUGIN_PATH, // Path to your plugin file
+	'flms' // The plugin slug (unique identifier for your plugin)
 );
 
 $myUpdateChecker->setBranch('master');
