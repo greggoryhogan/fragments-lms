@@ -1,0 +1,12 @@
+{
+    "name": "greggoryhogan/fragments-lms",
+    "authors": [
+        {
+            "name": "Gregg Hogan",
+            "email": "21093023+greggoryhogan@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "mpdf/mpdf": "^8.2"
+    }
+}
