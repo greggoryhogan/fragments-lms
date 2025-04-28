@@ -3,7 +3,7 @@
 Plugin Name:  Fragments LMS
 Plugin URI:	  https://fragmentlms.com
 Description:  Learning management software built for developers, by developers
-Version:	  1.1.6
+Version:	  1.1.5
 Author:		  Fragment
 Author URI:   https://fragmentwebworks.com
 License:      GPL2
@@ -145,18 +145,4 @@ function flms_deactivation() {
 		}
 	} 
 
-}
-
-//Plugin updater
-if (is_admin()) {
-	
-    define('GH_REQUEST_URI', 'https://api.github.com/repos/%s/%s/releases');
-    define('GHPU_USERNAME', 'greggoryhogan');
-    define('GHPU_REPOSITORY', 'fragments-lms');
-    define('GHPU_AUTH_TOKEN', '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');
-
-    include_once dirname( FLMS_PLUGIN_FILE ) . '/assets/library/GhPluginUpdater.php';
-
-    $updater = new GhPluginUpdater(__FILE__);
-    $updater->init();
 }

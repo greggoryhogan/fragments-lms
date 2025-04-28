@@ -48,6 +48,11 @@ final class FLMS {
         //Class autoloader
         include_once FLMS_ABSPATH . 'includes/class-flms-autoloader.php';
 
+		//Updates
+		if(is_admin()) {
+			include_once dirname( FLMS_PLUGIN_FILE ) . '/includes/class-flms.php';
+		}
+		
 		//Defaults
 		include_once FLMS_ABSPATH . 'includes/global.php';
 		
