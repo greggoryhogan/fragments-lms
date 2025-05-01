@@ -862,7 +862,16 @@ class FLMS_Reports {
                                             $course_version = $query_results[0]->course_version;
                                             $course_number = $course_numbers->get_course_number($course_id, $course_version);
                                         } else {
-                                            $course_number = $course_numbers->get_course_number($course_id);
+                                            //backward compatibility for early date bug in courses
+                                            $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date'] . ' +1 day'));
+                                            $sql_query = "SELECT course_version FROM $table WHERE enroll_date >= '$start_query_date' AND enroll_date <= '$end_query_date' AND course_id = '$course_id' AND customer_id = '$user_id' LIMIT 1";
+                                            $query_results = $wpdb->get_results( $sql_query ); 
+                                            if(!empty($query_results)) {
+                                                $course_version = $query_results[0]->course_version;
+                                                $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                            } else {
+                                                $course_number = $course_numbers->get_course_number($course_id);
+                                            }
                                         }
                                         $response .= '<td data-title="Course number">'.$course_number.'</td>';
                                     }
@@ -1395,6 +1404,8 @@ class FLMS_Reports {
                                         $course_version = $query_results[0]->course_version;
                                         $course_number = $course_numbers->get_course_number($course_id, $course_version);
                                     } else {
+                                        //backward compatibility for early date bug in courses
+                                        $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date'] . ' +1 day'));
                                         $sql_query = "SELECT course_version FROM $table WHERE enroll_date >= '$start_query_date' AND enroll_date <= '$end_query_date' AND course_id = '$course_id' AND customer_id = '$user_id' LIMIT 1";
                                         $query_results = $wpdb->get_results( $sql_query ); 
                                         if(!empty($query_results)) {

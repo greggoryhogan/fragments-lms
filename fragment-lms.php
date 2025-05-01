@@ -3,7 +3,7 @@
 Plugin Name:  Fragments LMS
 Plugin URI:	  https://fragmentlms.com
 Description:  Learning management software built for developers, by developers
-Version:	  1.1.13
+Version:	  1.1.14
 Author:		  Fragment
 Author URI:   https://fragmentwebworks.com
 License:      GPL2
