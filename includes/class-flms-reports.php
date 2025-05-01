@@ -1371,6 +1371,7 @@ class FLMS_Reports {
                     }
                 } 
                 if(!empty($course_royalties)) {
+                    date_default_timezone_set(wp_timezone_string());
                     global $wpdb;
                     $course_royalties = $this->maybe_resort_royalties($course_royalties);
                     $currency = get_woocommerce_currency_symbol();
@@ -1394,7 +1395,14 @@ class FLMS_Reports {
                                         $course_version = $query_results[0]->course_version;
                                         $course_number = $course_numbers->get_course_number($course_id, $course_version);
                                     } else {
-                                        $course_number = $course_numbers->get_course_number($course_id);
+                                        $sql_query = "SELECT course_version FROM $table WHERE enroll_date >= '$start_query_date' AND enroll_date <= '$end_query_date' AND course_id = '$course_id' AND customer_id = '$user_id' LIMIT 1";
+                                        $query_results = $wpdb->get_results( $sql_query ); 
+                                        if(!empty($query_results)) {
+                                            $course_version = $query_results[0]->course_version;
+                                            $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                        } else {
+                                            $course_number = $course_numbers->get_course_number($course_id);
+                                        }
                                     }
                                     $fields[] = $course_number;
                                 }
