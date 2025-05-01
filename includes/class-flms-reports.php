@@ -702,7 +702,9 @@ class FLMS_Reports {
                     
                     //$response .= '<pre>'.print_r($orders, true).'</pre>';
                     if(!empty($orders)) {
+                        $order_ct = 0;
                         foreach($orders as $order) {
+                            
                             foreach ( $order->get_items() as $item_id => $item ) {
                                 $product_id = $item->get_product_id();
                                 $product = wc_get_product($product_id);
@@ -784,6 +786,7 @@ class FLMS_Reports {
                                             'due' => $due,
                                             'royalty_percent' => $royalty,
                                             'seats' => $seats,
+                                            'user_id' => $order->get_user_id(),
                                         );
                                         /*$course_royalties[$course]['purchases'] += $quantity;
                                         $course_royalties[$course]['total'] += $subtotal;
@@ -836,19 +839,31 @@ class FLMS_Reports {
                     date_default_timezone_set(wp_timezone_string());
                     //see if extra processing needed to sort by title
                     $course_royalties = $this->maybe_resort_royalties($course_royalties);
+                    $ct = 0;
+                    global $wpdb;
+                    $course_numbers = new FLMS_Module_Course_Numbers();
                     foreach($course_royalties as $course_id => $course_orders) {
+                        //$ct++;
                         $course_title = flms_get_the_title($course_id);
-                        $product_id = get_post_meta($course_id, 'flms_woocommerce_product_id', true);
+                        //$product_id = get_post_meta($course_id, 'flms_woocommerce_product_id', true);
                         $course_link = '<a href="'.get_edit_post_link($course_id).'" title="'.$course_title.'" target="_blank">'.$course_title.'</a>';
                         $order_link_prefix = '<a target="_blank" href="'.get_bloginfo('url').'/wp-admin/admin.php?page=wc-orders&action=edit&id=';
-                        if(flms_is_module_active('course_numbers')) {
-                            $course_numbers = new FLMS_Module_Course_Numbers();
-                            $course_number = $course_numbers->get_course_number($course_id);
-                        }
                         if(is_array($course_orders)) {
                             foreach($course_orders as $data) {
                                 $response .= '<tr>';
                                     if(flms_is_module_active('course_numbers')) {
+                                        $user_id = $data['user_id'];
+                                        $table = FLMS_ACTIVITY_TABLE;
+                                        $start_query_date = date('Y-m-d 00:00:00', strtotime($data['order_date']));
+                                        $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date']));
+                                        $sql_query = "SELECT course_version FROM $table WHERE enroll_date >= '$start_query_date' AND enroll_date <= '$end_query_date' AND course_id = '$course_id' AND customer_id = '$user_id' LIMIT 1";
+                                        $query_results = $wpdb->get_results( $sql_query ); 
+                                        if(!empty($query_results)) {
+                                            $course_version = $query_results[0]->course_version;
+                                            $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                        } else {
+                                            $course_number = $course_numbers->get_course_number($course_id);
+                                        }
                                         $response .= '<td data-title="Course number">'.$course_number.'</td>';
                                     }
                                     $response .= '<td data-title="Title">'.$course_link.'</td>';
@@ -1346,6 +1361,7 @@ class FLMS_Reports {
                                             'total' => $subtotal,
                                             'due' => $due,
                                             'royalty_percent' => $royalty,
+                                            'user_id' => $order->get_user_id(),
                                         );
                                         
                                     }
@@ -1355,8 +1371,10 @@ class FLMS_Reports {
                     }
                 } 
                 if(!empty($course_royalties)) {
+                    global $wpdb;
                     $course_royalties = $this->maybe_resort_royalties($course_royalties);
                     $currency = get_woocommerce_currency_symbol();
+                    $course_numbers = new FLMS_Module_Course_Numbers();
                     foreach($course_royalties as $course_id => $course_orders) {
                         if(is_array($course_orders)) {
                             $course_title = flms_get_the_title($course_id);
@@ -1364,8 +1382,20 @@ class FLMS_Reports {
                             foreach($course_orders as $data) {
                                 $fields = array();
                                 if(flms_is_module_active('course_numbers')) {
-                                    $course_numbers = new FLMS_Module_Course_Numbers();
-                                    $course_number = $course_numbers->get_course_number($course_id, 'inherit', 'global');
+                                    //$course_numbers = new FLMS_Module_Course_Numbers();
+                                    //$course_number = $course_numbers->get_course_number($course_id, 'inherit', 'global');
+                                    $user_id = $data['user_id'];
+                                    $table = FLMS_ACTIVITY_TABLE;
+                                    $start_query_date = date('Y-m-d 00:00:00', strtotime($data['order_date']));
+                                    $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date']));
+                                    $sql_query = "SELECT course_version FROM $table WHERE enroll_date >= '$start_query_date' AND enroll_date <= '$end_query_date' AND course_id = '$course_id' AND customer_id = '$user_id' LIMIT 1";
+                                    $query_results = $wpdb->get_results( $sql_query ); 
+                                    if(!empty($query_results)) {
+                                        $course_version = $query_results[0]->course_version;
+                                        $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                    } else {
+                                        $course_number = $course_numbers->get_course_number($course_id);
+                                    }
                                     $fields[] = $course_number;
                                 }
                                 $fields[] = $course_title;
