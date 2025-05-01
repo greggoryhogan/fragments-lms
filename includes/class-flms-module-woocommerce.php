@@ -2743,11 +2743,15 @@ class FLMS_Module_Woocommerce {
         $product_id = get_post_meta($course_id,'flms_woocommerce_product_id', true);
 
         //force new product creation
+        $update_existing_orders = false;
+        $deleted_product_id = '';
         if($force_create_new_product) {
             if($product_id != '') {
                 $product = wc_get_product($product_id);
                 if($product !== false) {
-                    $product->delete();   
+                    $product->delete();  
+                    $deleted_product_id = $product_id; 
+                    $update_existing_orders = true;
                 }
                 $product_id = '';
             }
@@ -2762,12 +2766,17 @@ class FLMS_Module_Woocommerce {
                 $product = new WC_Product_Variable();
             }
             $product = apply_filters('flms_create_course_product', $product);
-            $product->set_name( flms_get_the_title($course_id) );
+            $product->set_name( get_the_title($course_id) );
             $product->set_status( 'publish' ); 
             $product->set_catalog_visibility( 'hidden' );
             $product->save();
             $product_id = $product->get_id();
             
+            if($current_type == 'simple') {
+                $parent_id = $product_id;
+            } else {
+
+            }
             //tag that it's been processed
             update_post_meta($course_id, 'flms_woocommerce_product_id', $product_id);
             update_post_meta($product_id, 'flms_woocommerce_product_id', $course_id);
@@ -2775,7 +2784,35 @@ class FLMS_Module_Woocommerce {
             //hide the product from the catalog
             wp_set_object_terms( $product_id, array( 'exclude-from-catalog', 'exclude-from-search' ), 'product_visibility' );
 			update_post_meta( $product_id, '_visibility', '_visibility_hidden' );
+            
+            //associated old orders with new products
+            if($update_existing_orders && apply_filters('flms_update_orders_on_product_regenration', true)) {
+                $limit = 20; 
+                $page = 1;
+                do {
+                    $orders = wc_get_orders([
+                        'limit'  => $limit,
+                        'paged'  => $page,
+                        'status' => ['completed', 'processing', 'on-hold', 'pending'], // Adjust as needed
+                        'return' => 'objects',
+                    ]);
 
+                    foreach ( $orders as $order ) {
+                        foreach ( $order->get_items() as $item ) {
+                            //$product_id
+                            $existing_product_id = $item->get_product_id();
+                            if($existing_product_id == $deleted_product_id) {
+                                $item->set_product_id( $product_id );
+                                $item->save();
+                            }
+                        }
+                    }
+
+                    $page++;
+                } while ( count( $orders ) === $limit );
+            }
+            
+            //allow hooks
             do_action('flms_after_course_product_created', $course_id, $product_id);
         }
 
@@ -2938,6 +2975,7 @@ class FLMS_Module_Woocommerce {
             //get_course_version_name
             $product->set_name( $course->get_course_version_name($flms_latest_version) );
             $product->save();
+
             return $product_id;
         } 
         return false;

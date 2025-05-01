@@ -673,10 +673,11 @@ class FLMS_Reports {
                     $products = wc_get_products($args);
                     $products_array = array();
                     if(!empty($products)) {
+                        // TODO: Replace with listpluck
                         foreach($products as $product) {
                             //$response .= $product->get_id().'<br>';
                             $products_array[] = $product->get_id();
-                            if ( $product->is_type( 'variable' ) ) {
+                            /*if ( $product->is_type( 'variable' ) ) {
                                 $variations = $product->get_available_variations();
                                 foreach ( $variations as $variation ) {
                                     //35652,35651
@@ -684,7 +685,7 @@ class FLMS_Reports {
                                    // $response .= '<pre>'.print_r($variation,true).'</pre>';
                                     //$products_array[] = $variation->get_id();
                                 }
-                             }
+                            }*/
                         }
                     }
                     wp_reset_postdata(  );                    
