@@ -37,6 +37,7 @@ class FLMS_Module_Course_Numbers {
     
     public function flms_course_number_shortcode($atts) {
         global $post, $flms_active_version, $flms_settings;
+        $course_version = $flms_active_version;
         $default_atts = array(
             'before' => '',
             'after' => '',
@@ -63,7 +64,8 @@ class FLMS_Module_Course_Numbers {
             }
         } 
         $post_id = $post->ID;
-        $course_number = $this->get_course_number($post_id, $flms_active_version, $type);
+        $course_number = $this->get_course_number($post_id, $course_version, $type);
+        $flms_active_version = $course_version;
         if($course_number != '') {
             $return = '';
             if($atts['font-size'] != '') {
@@ -75,6 +77,7 @@ class FLMS_Module_Course_Numbers {
             }
             return $return;
         }
+        
         return ;
     }
 
@@ -97,7 +100,7 @@ class FLMS_Module_Course_Numbers {
             }
         }
         //flms_debug($course_numbers);
-        $course = new FLMS_Course($post_id);
+        $course = new FLMS_Course($post_id, $active_version);
         global $flms_active_version;
         $flms_active_version = $active_version;
         $course->update_course_version_field('course_numbers', $course_numbers);

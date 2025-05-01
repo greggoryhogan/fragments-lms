@@ -502,7 +502,7 @@ class FLMS_Shortcodes {
 	public function course_name() {
 		global $post, $flms_active_version;
 		$course_version = $flms_active_version;
-		$course = new FLMS_Course($post->ID);
+		$course = new FLMS_Course($post->ID, $course_version);
 		return $course->get_course_version_name($course_version);
 	}
 

@@ -19,7 +19,7 @@ class FLMS_Course {
 	/**
 	 * The Constructor.
 	 */
-	public function __construct(int $post_id) {
+	public function __construct(int $post_id, int $course_version = 0) {
 		global $flms_course_id, $flms_active_version, $flms_course_version_content, $wp, $flms_version_index, $flms_latest_version, $flms_course_steps, $flms_user_activity;
 		$this->course_id = absint($post_id);
 		$flms_course_id = $this->course_id;
@@ -48,7 +48,11 @@ class FLMS_Course {
 		if(is_admin()) {
 			$flms_active_version = get_post_meta($flms_course_id,'flms_course_active_version',true);
 		} else {
-			$flms_active_version = flms_get_current_course_version();
+			if($course_version > 0) {
+				$flms_active_version = $course_version;
+			} else {
+				$flms_active_version = flms_get_current_course_version();
+			}
 		}
 
 	}

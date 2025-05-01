@@ -53,10 +53,11 @@ if($current_user === false) {
     wp_redirect(get_bloginfo('url').'/my-account/?display-error=invalid-user-id');
 }
 $certificate_label = $flms_settings['labels']['certificate_singular'];
-$course = new FLMS_Course($course_id);
+$course = new FLMS_Course($course_id, $course_version);
 global  $flms_active_version, $flms_settings;
 $flms_active_version = $course_version;
 $course_title = $course->get_course_version_name($course_version);
+$flms_active_version = $course_version;
 $date = date('Y-m-d');
 $pdf_title = strtolower(str_replace(' ','-',"$course_title $certificate_label $date")).'.pdf';
 $certificates = $course->get_course_certificates();
