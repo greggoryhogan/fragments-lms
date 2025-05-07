@@ -154,6 +154,9 @@ class FLMS_Module_Woocommerce {
 
        add_action( 'woocommerce_product_options_pricing', array($this,'flms_variation_has_course_notice') );
        add_action('woocommerce_variable_product_before_variations', array($this, 'flms_variation_has_course_notice'));
+
+       //customer completed course email
+       add_filter('woocommerce_email_classes', array($this, 'woocommerce_emails'));
        
     }
 
@@ -3404,6 +3407,11 @@ class FLMS_Module_Woocommerce {
         //}
 
         return $query_args;
+    }
+
+    public function woocommerce_emails($emails) {
+        $emails['FLMS_Email_Customer_Completed_Course'] = include(FLMS_ABSPATH . 'includes/emails/class-flms-customer-completed-course.php');
+        return $emails;
     }
 }
 new FLMS_Module_Woocommerce();
