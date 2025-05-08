@@ -3542,4 +3542,11 @@ function flms_natural_language_join(array $list, $conjunction = 'and') {
 	  return implode(', ', $list) . ' ' . $conjunction . ' ' . $last;
 	}
 	return $last;
-  }
+}
+
+function flms_is_dev_env() {
+	if(defined('FLMS_DEV_ENV')) {
+		return FLMS_DEV_ENV;
+	}
+	return false;
+}

@@ -63,7 +63,8 @@
         e.preventDefault();
         var type = 'single-choice';
         var clone = $('#input-clone.type-'+type).html();
-        var cloneindex = $('.answer-options-container .answer-input').length + 1;
+        var cloneindex = $('.answer-options-container .answer-input').length;
+        //console.log(cloneindex);
         $('.answer-options-container').append('<div class="answer-input type-'+type+' is-clone">'+clone+'</div>');
         //update val index
         $('.is-clone').find('input[name="question-correct"]').val(cloneindex);

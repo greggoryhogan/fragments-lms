@@ -156,7 +156,9 @@ class FLMS_Module_Woocommerce {
        add_action('woocommerce_variable_product_before_variations', array($this, 'flms_variation_has_course_notice'));
 
        //customer completed course email
-       add_filter('woocommerce_email_classes', array($this, 'woocommerce_emails'));
+       if(flms_is_dev_env()) {
+        add_filter('woocommerce_email_classes', array($this, 'woocommerce_emails'));
+       }
        
     }
 

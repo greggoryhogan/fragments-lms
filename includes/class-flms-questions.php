@@ -75,10 +75,11 @@ class FLMS_Questions {
 				case 'single-choice':
 				case 'multiple-choice':
 					if(isset($_POST['single-choice-content'])) {
+						flms_debug($_POST);
 						$correct_answer = '';
 						if(isset($_POST['question-correct'])) {
 							if(is_array($_POST['question-correct'])) {
-								$correct_answer = array_map('absint', $_POST['question-correct']);
+								$correct_answer = absint($_POST['question-correct'][0]);
 							} else {
 								$correct_answer = sanitize_text_field( $_POST['question-correct']);
 							}
