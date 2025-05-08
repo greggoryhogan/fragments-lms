@@ -75,11 +75,10 @@ class FLMS_Questions {
 				case 'single-choice':
 				case 'multiple-choice':
 					if(isset($_POST['single-choice-content'])) {
-						flms_debug($_POST);
 						$correct_answer = '';
 						if(isset($_POST['question-correct'])) {
 							if(is_array($_POST['question-correct'])) {
-								$correct_answer = absint($_POST['question-correct'][0]);
+								$correct_answer = array_map('absint', $_POST['question-correct']);
 							} else {
 								$correct_answer = sanitize_text_field( $_POST['question-correct']);
 							}
@@ -204,7 +203,7 @@ class FLMS_Questions {
 				}
 				if($question_type['type'] != 'multiple-choice') {
 					echo '<div class="answer-option '.$active.'" id="answer-type-'.$question_type['type'].'">';
-						echo $this->question_type_output($question_type['type'], $value);
+						echo $this->question_type_editor_output($question_type['type'], $value);
 					echo '</div>';
 				}
 			}
@@ -253,7 +252,7 @@ class FLMS_Questions {
 		return $question_types;
 	}
 
-	private function question_type_output($type, $value) {
+	private function question_type_editor_output($type, $value) {
 		switch($type) {
 			case 'single-choice':
 			case 'multiple-choice':
@@ -268,8 +267,8 @@ class FLMS_Questions {
 						$return .= $this->single_multiple_choice_fields($type, $k, false, $answer_option);
 					}
 				} else {
-					$clone_index = 2;
-					$return .= $this->single_multiple_choice_fields($type, 1);
+					$clone_index = 1;
+					$return .= $this->single_multiple_choice_fields($type, 0);
 				}
 				$return .= '</div>';
 				

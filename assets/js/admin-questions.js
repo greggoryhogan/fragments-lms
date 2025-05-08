@@ -64,7 +64,6 @@
         var type = 'single-choice';
         var clone = $('#input-clone.type-'+type).html();
         var cloneindex = $('.answer-options-container .answer-input').length;
-        //console.log(cloneindex);
         $('.answer-options-container').append('<div class="answer-input type-'+type+' is-clone">'+clone+'</div>');
         //update val index
         $('.is-clone').find('input[name="question-correct"]').val(cloneindex);
@@ -172,6 +171,11 @@
                     */
                 },
                 update: function( event, ui ) {
+                    var input_count = 0;
+                    $('.answer-options-container.single-choice, .answer-options-container.multiple-choice').find('.answer-options').each(function() {
+                        $(this).find('input').val(input_count);
+                        input_count++;
+                    });
                     /*$(this + ' .exam-question').each(function() {
                         if($(this).hasClass('to-be-removed')) {
                             $(this).find('input').attr('name','deselected-flms-exams[]');
