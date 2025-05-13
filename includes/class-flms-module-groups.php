@@ -894,6 +894,7 @@ class FLMS_Module_Groups {
                 $notice = '<sup>*</sup>';
             } else {
                 $columns = 2;
+                $notice = '';
             }
             
             $return .= '<div class="flms-flex column group-add-course-form">';
@@ -1150,8 +1151,10 @@ class FLMS_Module_Groups {
         $current_user = get_user_by('id', $current_user_id);
         $group_owner = get_post_meta($post->ID, 'flms_group_owner', true);
         $managers = get_post_meta($post->ID, 'flms_group_manager');
-        if($group_owner != $current_user_id && !in_array($current_user->user_email, $managers)) {
-            return;
+        if(!current_user_can('administrator')) {
+            if($group_owner != $current_user_id && !in_array($current_user->user_email, $managers)) {
+                return;
+            }
         }
         $group_members = get_post_meta($post->ID, 'flms_group_member');
         wp_enqueue_script( 'flms-groups' );
@@ -1177,7 +1180,7 @@ class FLMS_Module_Groups {
         
         
 
-        echo '<div class="flms-group-member-data">';
+        echo '<div class="flms-group-member-data mb-5 pb-5">';
             echo sprintf('<h2>%s Members</h2>', flms_get_label('groups_singular'));
             if(empty($group_members)) {
                 echo sprintf('<p><em>This %s has no members.</em></p>',strtolower($group_label));
@@ -1293,8 +1296,10 @@ class FLMS_Module_Groups {
         $current_user = get_user_by('id', $current_user_id);
         $group_owner = get_post_meta($post->ID, 'flms_group_owner', true);
         $managers = get_post_meta($post->ID, 'flms_group_manager');
-        if($group_owner != $current_user_id && !in_array($current_user->user_email, $managers)) {
-            return;
+        if(!current_user_can('administrator')) {
+            if($group_owner != $current_user_id && !in_array($current_user->user_email, $managers)) {
+                return;
+            }
         }
         $group_members = get_post_meta($post->ID, 'flms_group_member');
         wp_enqueue_script( 'flms-groups' );
@@ -1344,7 +1349,7 @@ class FLMS_Module_Groups {
             }
             
         }
-        if($group_owner == $current_user_id) {
+        if($group_owner == $current_user_id || current_user_can('administrator')) {
             if(!empty($notfound)) {
                 echo '<div class="flms-unfound-managers">';
                     echo '<p>Some manager profiles could not be found:</p><ul><li>'.implode('</li><li>',$notfound).'</li></ul>';
@@ -1383,7 +1388,7 @@ class FLMS_Module_Groups {
         $current_user_id = get_current_user_id();
         $current_user = get_user_by('id', $current_user_id);
         $is_manager = false;
-        if(in_array($current_user->user_email, $group_managers)) {
+        if(in_array($current_user->user_email, $group_managers) || current_user_can('administrator')) {
             $is_manager = true;
         }
         $return = '';
@@ -1413,6 +1418,7 @@ class FLMS_Module_Groups {
                 $return .='<div class="flms-font-bold flms-desktop-only actions">Actions</div>';*/
                 $course_index = 0;
                 foreach($group_courses as $course_info => $course_settings) {
+                    //$return .= '<pre>'.print_r($course_settings, true).'</pre>';
                     $course_data = explode(':',$course_info);
                     $course_id = $course_data[0];
                     //check if it exists
@@ -1435,6 +1441,8 @@ class FLMS_Module_Groups {
                                     $enrolled = 0;
                                     $enrolled_users = array();
                                 }
+                                //$return .= $current_user_id;
+                                //$return .= '<pre>'.print_r($enrolled_users, true).'</pre>';
                                 $return .= '<div data-label="Course:"><a href="'.$course->get_course_version_permalink($course_version).'" class="flms-course-title">'.$course->get_course_version_name($course_version).'</a></div>';
                                 if(flms_is_module_active('course_credits')) {
                                     $course = new FLMS_Course($course_id);
@@ -1553,6 +1561,7 @@ class FLMS_Module_Groups {
                                 } else {
                                     $return .= '<div class="actions product-data group-data flms-mobile-only" data-label="Status:">';
                                         //if(!flms_user_has_access($course_id, $course_version, true)) {
+                                        //$return .= print_r($enrolled_users,true);
                                         if(!in_array($current_user_id, $enrolled_users)) {
                                             if($seats > 0) {
                                                 $return .= '<button class="button button-primary group-course-enroll" data-course-index="'.$course_index.'">'.flms_get_label('enroll_label').'</button>';
