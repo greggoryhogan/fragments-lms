@@ -79,8 +79,8 @@ class FLMS_Setup {
 		add_action( 'flms_cleanup', array($cron, 'daily_cleanup'), 10, 6 );
 
 		if(flms_is_module_active('woocommerce')) {
-			$woo = new FLMS_Module_Woocommerce();
-			$woo->flms_init_woo_actions_and_filters();
+			$GLOBALS['flms_module_woocommerce'] = new FLMS_Module_Woocommerce();
+			$GLOBALS['flms_module_woocommerce']->flms_init_woo_actions_and_filters();
 		}
 	}
 
