@@ -34,6 +34,10 @@ class FLMS_Template {
 			add_action('flms_course_content', array($this, 'flms_course_description'), 10);
 			add_action('template_redirect', array($this,'flms_access_redirect'));
 			add_action('before_flms_course_content', array($this, 'flms_enroll_actions'), 5);
+			if(flms_is_module_active('course_expiration')) {
+				$course_expiration = new FLMS_Module_Course_Expiration();
+				add_action('before_flms_course_content', array($course_expiration, 'flms_course_expiration_notice'), 10);
+			}
 			if(flms_is_module_active('course_certificates')) {
 				//add_action('before_flms_course_content', array($this, 'flms_show_course_certificate'), 7);
 				add_action('after_flms_course_exams', array($this, 'flms_show_previous_completion_certificates'), 10);

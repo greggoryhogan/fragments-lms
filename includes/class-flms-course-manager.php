@@ -999,6 +999,48 @@ class FLMS_Course_Manager {
 					$return .= '</div>';
 						
 				}
+
+				if(flms_is_module_active('course_expiration')) {
+					$return .= '<div class="settings-field">';
+						$return .= '<div class="setting-field-label">Course expiration';
+						if($layout == 'grid') {
+							$return .= ' <div class="flms-tooltip" data-tooltip="If this course has an expiration date, check the box below and set the date"></div>';
+						}
+						$return .= '</div>';
+						if($layout != 'grid') {
+							$return .= '<p class="description">If this course has an expiration date, check the box below and set the date</p>';
+						}
+						$status_value = '';
+						if(isset($versions["{$active_version}"]['course_expiration']['version_expires'])) {
+							$status_value = $versions["{$active_version}"]['course_expiration']['version_expires'];
+						}
+						$checked = '';
+						if($status_value != '') {
+							$checked = ' checked="checked"';
+						}
+						$return .= '<div class="settings-field">';
+						$return .= '<label class="setting-field-label sublabel"><input type="checkbox" name="course_expires" value="1" '.$checked.' /> Expire this version using the expiration date below.';
+						$return .= '</div>';
+						$return .= '<div class="settings-field">';
+						$date = '';
+						if(isset($versions["$active_version"]['course_expiration']['expiration_date'])) {
+							$date = $versions["$active_version"]['course_expiration']['expiration_date'];
+						}
+						$return .= '<input type="date" name="expiration_date" placeholder="" value="'.$date.'" />';
+						$time = '00:00:00';
+						if(isset($versions["$active_version"]['course_expiration']['expiration_time'])) {
+							$time = $versions["$active_version"]['course_expiration']['expiration_time'];
+						}
+						$return .= '<input type="time" name="expiration_time" value="'.$time.'" />';
+						$return .= '</div>';
+						/*$return .= '<div class="well"><div id="datetimepicker2" class="input-append">';
+							$return .= '<input data-format="'.get_option('date_format').' '.get_option('time_format').'" type="text"></input>';
+							$return .= '<span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>';
+						$return .= '</div></div>';*/
+					
+					$return .= '</div>';
+						
+				}
 				
 				if(count($versions) > 1) {
 					$return .= '<div class="settings-field field-separator"></div>';
@@ -1642,6 +1684,12 @@ class FLMS_Course_Manager {
 				} 
 				$this->update_version_access($post_id, $active_version, $course_access, $course_progression);
 
+				//update course expiration
+				if(flms_is_module_active('course_expiration')) {
+					$this->update_course_expiration($post_id, $active_version, $_POST);
+				}
+
+
 				//Update sample lessons
 				$sample_lessons = array();
 				if (isset($_POST['flms-sample-lessons']) && is_array($_POST['flms-sample-lessons'])) {
@@ -2062,6 +2110,50 @@ class FLMS_Course_Manager {
 		}
 		$course_versioned_content["{$active_version}"]['post_content'] = wp_kses_post($content);
 		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
+	}
+
+	public function update_course_expiration($post_id, $active_version, $postdata) {
+		$course_versioned_content = get_post_meta($post_id,'flms_version_content',true);
+		if(!is_array($course_versioned_content)) {
+			$course_versioned_content = array();
+		}
+		if(!isset($course_versioned_content["{$active_version}"]['course_expiration'])) {
+			$course_versioned_content["{$active_version}"]['course_expiration'] = array();
+		}
+		$expires = '';
+		if(isset($postdata['course_expires'])) {
+			$expires = $postdata['course_expires'];
+		}
+		if(isset($postdata['expiration_date'])) {
+			$date = $postdata['expiration_date'];
+		}
+		if(isset($postdata['expiration_time'])) {
+			$time = $postdata['expiration_time'];
+		}
+		$course_versioned_content["{$active_version}"]['course_expiration'] = array(
+			'version_expires' => $expires,
+			'expiration_date' => $date,
+			'expiration_time' => $time
+		);
+		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
+
+		//remove and potentially reset flag(s) for course expiration
+		$expirations = array();
+		foreach($course_versioned_content as $active_version => $content) {
+			if(isset($content['course_expiration']['version_expires'])) {
+				if($content['course_expiration']['version_expires'] != '') {
+					if(isset($content['course_expiration']['expiration_date'])) {
+						$expirations[] = $content['course_expiration']['expiration_date'];
+					}
+				}
+			}
+		}
+		delete_post_meta($post_id, 'flms_course_has_expiration_date');
+		if(!empty($expirations)) {
+			foreach($expirations as $expiration) {	
+				add_post_meta($post_id, 'flms_course_has_expiration_date', $expiration );
+			}
+		}
 	}
 
 	public function update_version_preview($post_id,$active_version, $content) {

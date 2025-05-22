@@ -232,6 +232,8 @@ final class FLMS {
 			);
 			wp_localize_script( 'flms-groups', 'flms_groups', $groups_data);
 		}
+
+		
 	}
 	
 	public function register_admin_scripts() {
@@ -287,6 +289,20 @@ final class FLMS {
 		if ( in_array(get_post_type(), flms_get_plugin_post_type_internal_permalinks() ) ) {
         	wp_dequeue_script( 'autosave' );
 		}
+
+		/*global $post;
+		if(isset($post)) {
+			if($post->post_type == 'flms-courses') {
+				if(flms_is_module_active('course_expiration')) {
+					wp_enqueue_script( 'flms-course-expiration', FLMS_PLUGIN_URL . 'assets/js/admin-course-expiration.js', array('jquery','datetimepicker'), $this->version, array('strategy' => 'defer') );
+					wp_localize_script('flms-course-expiration','course_expiration', array(
+						'format' => get_option('date_format') .' '.get_option('time_format'),
+						'language' => get_locale(),
+						'hour12' => apply_filters('flms_course_expiration_time_format_12_hr', true)
+					));
+				}
+			}
+		}*/
 
 	}
 

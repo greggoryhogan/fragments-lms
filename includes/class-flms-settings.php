@@ -456,6 +456,17 @@ class FLMS_Settings {
 				'layout' => 'grid text-top',
 			);
 		}
+		if(flms_is_module_active('course_expiration')) {
+			$course_expiration = new FLMS_Module_Course_Expiration();
+			$this->plugin_fields['course_expiration'] = array(
+				'label' => 'Course Expiration',
+				'id' => 'course_expiration',
+				'description' => 'Set the actions for when a course expires',
+				'tooltip' => '',
+				'layout' => 'grid text-top',
+				'fields' => $course_expiration->get_expiration_settings_fields(),
+			);
+		}
 		if(flms_is_module_active('groups')) {
 			$groups = new FLMS_Module_Groups();
 			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $groups->get_group_label_options());
@@ -597,6 +608,18 @@ class FLMS_Settings {
 						'default' => 'inactive',
 						'flag_check' => '',
 						'description' => 'Assign and display course numbers to your course versions'
+					),
+					array(
+						'label' => 'Course Expiration',
+						'key' => 'course_expiration',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Allow courses to be available for a limited time before enrollment is disabled'
 					),
 					array(
 						'label' => 'Groups',
