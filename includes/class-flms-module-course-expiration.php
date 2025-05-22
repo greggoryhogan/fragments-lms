@@ -62,14 +62,14 @@ class FLMS_Module_Course_expiration {
                 'label' => 'Enrolled User Expiration Text',
                 'key' => 'enrolled_user_course_expiration_text',
                 'type' => 'text',
-                'description' => 'The notice to show on a course with an expiration. <br>%expiration_date% will show the expiration date<br>%expiration_time% will show th expiration time.',
+                'description' => 'The notice to show on a course with an expiration.<br><strong>Placeholders:</strong><br>%expiration_date%<br>%expiration_time%<br>%expiration_timezone%',
                 'default' => "This course expires on %expiration_date% at %expiration_time%. Please complete the course before it expires."
             ),
             array(
                 'label' => 'Unenrolled User Expiration Text',
                 'key' => 'unenrolled_user_course_expiration_text',
                 'type' => 'text',
-                'description' => 'The notice to show on a course with an expiration. <br>%expiration_date% will show the expiration date<br>%expiration_time% will show th expiration time.',
+                'description' => 'The notice to show on a course with an expiration.<br><strong>Placeholders:</strong><br>%expiration_date%<br>%expiration_time%<br>%expiration_timezone%',
                 'default' => "This course expires on %expiration_date% at %expiration_time%. Please purchase the course before it expires."
             ),
         );
@@ -148,7 +148,13 @@ class FLMS_Module_Course_expiration {
         }
         $notice = str_replace('%expiration_date%', $date, $notice);
         $notice = str_replace('%expiration_time%', $time, $notice);
+        $notice = str_replace('%expiration_timezone%', $this->getabbreviatedtimezone(), $notice);
         echo flms_alert($notice);
+    }
+
+    private function getabbreviatedtimezone(){
+        $date = new DateTime(null, new DateTimeZone(wp_timezone_string()));
+        return $date->format('T');
     }
 }
 new FLMS_Module_Course_Expiration();
