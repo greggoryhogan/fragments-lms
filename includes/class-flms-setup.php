@@ -89,6 +89,8 @@ class FLMS_Setup {
 		if(flms_is_module_active('woocommerce')) {
 			$GLOBALS['flms_module_woocommerce'] = new FLMS_Module_Woocommerce();
 			$GLOBALS['flms_module_woocommerce']->flms_init_woo_actions_and_filters();
+			$course_progress = new FLMS_Course_Progress();
+			add_action('flms_user_completed_course', array($course_progress, 'send_customer_completed_course_email'), 10, 3);
 		}
 	}
 

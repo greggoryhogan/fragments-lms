@@ -30,34 +30,41 @@ if ( ! class_exists( 'FLMS_Email_Customer_Completed_Course' ) && class_exists('W
 		public function __construct() {
             $this->id = 'wc_vendor_email';
             $this->title = 'Course Completed';
-            $this->description = 'This email is sent to the vendor when a new order is placed.';
-            $this->heading = 'New Order Notification';
-            $this->subject = 'New Order Received';
+            $this->description = 'This email is sent when a customer completes a course.';
+            $this->heading = 'Course Completed!';
+            $this->subject = 'BHFE Course Completed';
 
-            $this->template_html  = 'template/emails/vendor-email.php';
+            $this->template_html  = 'template/emails/customer-completed-course.php';
             $this->template_plain = 'template/emails/plain/vendor-email.php';
-
-            add_action( 'woocommerce_order_status_completed_notification', array( $this, 'trigger' ) );
 
             parent::__construct();
         }
 
-        public function trigger( $order_id ) {
-            if ( ! $order_id ) return;
+        public function trigger( $user_id, $course_id, $course_version ) {
+            if ( ! $user_id ) return;
 
-            $this->object = wc_get_order( $order_id );
-            $this->recipient = 'vendor@example.com'; // Replace with the vendor's email address
+            //$this->object = wc_get_order( $order_id );
+            $this->user = get_user_by('id', $user_id);
+            $this->course_id = $course_id;
+            $this->course_version = $course_version;
+            $course = new FLMS_Course($course_id, $course_version);
+            $this->course_title = $course->get_course_version_name($course_version);
+            $this->recipient = $this->user->user_email;
 
             if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-                return;
+                //return;
             }
-
+            //error_log("Trigger fired for user ID: $user_id and course ID: $course_id");
             $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
         }
 
         public function get_content_html() {
             return wc_get_template_html( $this->template_html, array(
-                'order'         => $this->object,
+                'user'         => $this->user,
+                'user_first_name' => $this->user->user_firstname,
+                'course_id' => $this->course_id,
+                'course_version' => $this->course_version,
+                'course_title' => $this->course_title,
                 'email_heading' => $this->get_heading(),
                 'sent_to_admin' => false,
                 'plain_text'    => false,
@@ -67,7 +74,10 @@ if ( ! class_exists( 'FLMS_Email_Customer_Completed_Course' ) && class_exists('W
 
         public function get_content_plain() {
             return wc_get_template_html( $this->template_plain, array(
-                'order'         => $this->object,
+                'user'         => $this->user,
+                'course_id' => $this->course_id,
+                'course_version' => $this->course_version,
+                'course_title' => $this->course_title,
                 'email_heading' => $this->get_heading(),
                 'sent_to_admin' => false,
                 'plain_text'    => true,

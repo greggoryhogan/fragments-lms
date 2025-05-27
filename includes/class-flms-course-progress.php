@@ -544,6 +544,8 @@ class FLMS_Course_Progress {
 			$this->save_course_completion_time($insert_id, $course_id, $course_version, $user_id );
 		}
 
+		do_action('flms_user_completed_course', $user_id, $course_id, $course_version);
+		
 		$response = array(
 			'success' => 1,
 			'response' => 'Customer course progress reset for '.flms_get_the_title($course_id),
@@ -790,5 +792,10 @@ class FLMS_Course_Progress {
 			</div>
 		</div><?php
 	}
+
+	public function send_customer_completed_course_email($user_id, $course_id, $course_version) {
+		WC()->mailer()->get_emails()['FLMS_Email_Customer_Completed_Course']->trigger( $user_id, $course_id, $course_version );
+	}
+
 }
 new FLMS_Course_Progress();

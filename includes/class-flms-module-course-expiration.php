@@ -353,7 +353,7 @@ class FLMS_Module_Course_expiration {
                 $course_versioned_content = get_post_meta($course_id,'flms_version_content',true);
                 foreach($course_versioned_content as $active_version => $content) {
                     if($this->is_course_expired($course_id, $active_version)) {
-                        $this->expire_course($course_id, $course_version);
+                        $this->expire_course($course_id, $active_version);
                     }
                 }
             }
