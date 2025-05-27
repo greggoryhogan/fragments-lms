@@ -78,6 +78,14 @@ class FLMS_Setup {
 		add_action( 'init', array($cron, 'plugin_cleanup') );
 		add_action( 'flms_cleanup', array($cron, 'daily_cleanup'), 10, 6 );
 
+		if(flms_is_module_active('course_expiration')) {
+			$course_expiration = new FLMS_Module_Course_Expiration();
+        	add_filter( 'cron_schedules', array($course_expiration, 'course_expiration_cron_schedules') );
+			add_action( 'init', array($cron, 'check_for_expired_courses') );
+			add_action( 'flms_expired_course_check', array($cron, 'expire_courses'), 10, 6 );
+		}
+		
+
 		if(flms_is_module_active('woocommerce')) {
 			$GLOBALS['flms_module_woocommerce'] = new FLMS_Module_Woocommerce();
 			$GLOBALS['flms_module_woocommerce']->flms_init_woo_actions_and_filters();
@@ -1226,6 +1234,21 @@ class FLMS_Setup {
 				echo '<p>No completed '.$course_label.'</p>';
 			} else {
 				flms_get_user_completed_course_list($user_id, $completed_courses, true);
+			}
+			?>
+		</td>
+		</tr>
+		<tr>
+		<th>Expired <?php echo $courses_label; ?></th>
+		<td>
+			<?php 
+			$expired_courses = flms_get_user_expired_courses($user_id);
+			if(!is_array($expired_courses)) {
+				echo '<p>No expired '.$course_label.'</p>';
+			} else if(empty($expired_courses)) {
+				echo '<p>No expired '.$course_label.'</p>';
+			} else {
+				flms_get_user_expired_course_list($user_id,  $expired_courses, true);
 			}
 			?>
 		</td>

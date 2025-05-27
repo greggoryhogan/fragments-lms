@@ -1409,6 +1409,22 @@ class FLMS_Cron {
 
     }
 
+    public function check_for_expired_courses() {
+        if ( !wp_next_scheduled( 'flms_expired_course_check' ) ) {
+            global $flms_settings;
+            $schedule = 'hourly';
+            if(isset($flms_settings['course_expiration']['course_expiration_schedule'])) {
+                $schedule = $flms_settings['course_expiration']['course_expiration_schedule'];
+            }
+            wp_schedule_event( current_time( 'timestamp' ), $schedule, 'flms_expired_course_check');
+        }
+    }
+
+    public function expire_courses() {
+        $course_expiration = new FLMS_Module_Course_Expiration();
+        $course_expiration->expire_courses_cron();
+    }
+
     public function export_user_data($filename, $processed_users = 0, $user_id = 0) {
         $total_users = flms_get_site_user_count();
         $iteration = 500;

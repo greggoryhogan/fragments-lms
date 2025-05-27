@@ -728,6 +728,22 @@ class FLMS_Module_Woocommerce {
             echo flms_get_user_completed_course_list($user_id, $completed_courses);
         }
 
+        if(flms_is_module_active('course_expiration')) {
+            if(apply_filters('flms_show_expired_courses', true)) {
+                $expired_courses = flms_get_user_expired_courses();
+                //print_r($expired_courses);
+                
+                if(!is_array( $expired_courses)) {
+                    //echo '<p>You have not completed any '.strtolower($course_name).'.</p>';
+                } else if(empty( $expired_courses)) {
+                    //echo '<p>You have not completed any '.strtolower($course_name).'.</p>';
+                } else {
+                    echo apply_filters('flms_expired_courses_heading', '<h2 class="mt-4">Expired '.$course_name.'</h2>');
+                    echo flms_get_user_expired_course_list($user_id,  $expired_courses);
+                }
+            }
+        }
+
         do_action('flms_after_my_courses_tab_content');
     }
 

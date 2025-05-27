@@ -109,19 +109,28 @@ class FLMS_Template {
 			if($flms_active_version != $flms_latest_version) {
 				$allow_repurchase = false;
 			}
+			$is_expired = false;
+			if(flms_is_module_active('course_expiration')) {
+				$course_expiration = new FLMS_Module_Course_Expiration();
+				$is_expired = $course_expiration->is_course_expired($flms_course_id, $flms_active_version);
+			}
 			if($completed) {
 				$text = apply_filters('flms_completed_course_text', "You have completed this $course_label_lc.", $flms_course_id, $flms_active_version );
 				$message = $text;
-				if(apply_filters('flms_show_repurchase_link', true)) {
-					if($allow_repurchase) {
-						$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+				if(!$is_expired) {
+					if(apply_filters('flms_show_repurchase_link', true)) {
+						if($allow_repurchase) {
+							$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+						}
 					}
 				}
 			} else {
 				$message = 'You are currently enrolled in this '.$course_label_lc.'.';
-				if($active_text != '') {
-					if($allow_repurchase) {
-						$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+				if(!$is_expired) {
+					if($active_text != '') {
+						if($allow_repurchase) {
+							$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+						}
 					}
 				}
 			}
@@ -428,6 +437,16 @@ class FLMS_Template {
 				}
 			}
 		}
+
+		if(flms_is_module_active('course_expiration') && ($post->post_type == 'flms-lessons' || $post->post_type == 'flms-topics' || $post->post_type == 'flms-exams')) {
+			$course_expiration = new FLMS_Module_Course_Expiration();
+			if($course_expiration->is_course_expired($flms_course_id, $active_version)) {
+				$completed = flms_user_completed_course($flms_course_id, $active_version);
+				if(!$completed) {
+					wp_safe_redirect(trailingslashit( get_permalink($flms_course_id) ).$version_permalink.'?access=expired');
+				}
+			}
+		}
 	}
 	/**
 	 * Load master template for flms
@@ -693,6 +712,15 @@ class FLMS_Template {
 				$message = 'This '.strtolower(flms_get_post_type_label($post_type)).' must be completed before continuing.';
 				echo flms_alert($message, false);
 			}
+			/*if($_GET['access'] == 'expired') {
+				if(flms_is_module_active('course_expiration')) {
+					$course_expiration = new FLMS_Module_Course_Expiration();
+					$notice = $course_expiration->get_course_expiration_text();
+					if($notice != '') {
+						echo flms_alert($notice, false);
+					}
+				}
+			}*/
 		}
 
 		if (isset($_GET['user-unenrolled'])) {

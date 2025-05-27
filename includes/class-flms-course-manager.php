@@ -2138,22 +2138,9 @@ class FLMS_Course_Manager {
 		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
 
 		//remove and potentially reset flag(s) for course expiration
-		$expirations = array();
-		foreach($course_versioned_content as $active_version => $content) {
-			if(isset($content['course_expiration']['version_expires'])) {
-				if($content['course_expiration']['version_expires'] != '') {
-					if(isset($content['course_expiration']['expiration_date'])) {
-						$expirations[] = $content['course_expiration']['expiration_date'];
-					}
-				}
-			}
-		}
-		delete_post_meta($post_id, 'flms_course_has_expiration_date');
-		if(!empty($expirations)) {
-			foreach($expirations as $expiration) {	
-				add_post_meta($post_id, 'flms_course_has_expiration_date', $expiration );
-			}
-		}
+		$course_expirations = new FLMS_Module_Course_Expiration();
+		$course_expirations->check_course_for_expiration_flags($post_id, $active_version);
+
 	}
 
 	public function update_version_preview($post_id,$active_version, $content) {

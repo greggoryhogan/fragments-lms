@@ -854,6 +854,12 @@ class FLMS_Settings {
 				}
 			}
 		}
+
+		if($value['course_expiration']['course_expiration_schedule'] != $old_value['course_expiration']['course_expiration_schedule']) {
+			if ( wp_next_scheduled( 'flms_expired_course_check' ) ) {
+				wp_clear_scheduled_hook( 'flms_expired_course_check' );
+			}
+		}
 		return $value;
 	}
 

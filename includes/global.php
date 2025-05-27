@@ -156,6 +156,13 @@ function flms_get_course_lessons_list($course_data) {
 	if(apply_filters('flms_hide_course_content', false, $flms_user_has_access, $flms_course_id, $flms_active_version )) {
 		return '';
 	}
+	$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+	if(flms_is_module_active('course_expiration')) {
+		$course_expiration = new FLMS_Module_Course_Expiration();
+		if($course_expiration->is_course_expired($flms_course_id, $flms_active_version) && !$completed) {
+			return '';
+		}
+	}
 	$lesson_html = '';
 	if(isset($course_data["course_lessons"])) {
 		$lessons = $course_data["course_lessons"];
@@ -186,7 +193,7 @@ function flms_get_course_lessons_list($course_data) {
 								$sample = true;
 							}
 						}
-						$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+						
 						$lesson_html .= '<div class="flms-course-lesson-item flms-course-content-list-item flms-background-border';
 						if(!$flms_user_has_access && !$sample && !$completed) {
 							$lesson_html .= ' flms-no-access';
@@ -266,6 +273,12 @@ function flms_get_lesson_topics_list($lessons) {
 	$lesson_html = '';
 	if(!empty($lessons)) {
 		$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+		if(flms_is_module_active('course_expiration')) {
+			$course_expiration = new FLMS_Module_Course_Expiration();
+			if($course_expiration->is_course_expired($flms_course_id, $flms_active_version) && !$completed) {
+				return '';
+			}
+		}
 		$lesson_html = '<div class="flms-course-summary">';
 			$lesson_html .= apply_filters('flms_section_title', '<h2>'.flms_get_post_type_label('flms-topics', true).'</h2>', 'flms-topics');
 			$lesson_html .= '<div class="flms-course-lessons">';
@@ -469,6 +482,13 @@ function flms_get_associated_exams($course_data, $wrap = false) {
 	$lessons = $course_data["post_exams"];
 	$lesson_html = '';
 	if(!empty($lessons)) {
+		$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+		if(flms_is_module_active('course_expiration')) {
+			$course_expiration = new FLMS_Module_Course_Expiration();
+			if($course_expiration->is_course_expired($flms_course_id, $flms_active_version) && !$completed) {
+				return '';
+			}
+		}
 		if($wrap) {
 			$lesson_html .= '<div class="flms-course-summary">';
 		}
@@ -476,7 +496,6 @@ function flms_get_associated_exams($course_data, $wrap = false) {
 			$lesson_html .= apply_filters('flms_section_title', '<h2>'.flms_get_post_type_label('flms-exams', true).'</h2>', 'flms-exams');
 			$lesson_html .= '<div class="flms-list">';
 				foreach($lessons as $lesson_id) {
-					$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
 					$lesson_html .= '<div class="flms-course-lesson-item flms-course-exam flms-background-border';
 					if(!$flms_user_has_access && !$completed) {
 						$lesson_html .= ' flms-no-access';
@@ -1138,6 +1157,23 @@ function flms_get_user_active_courses($user_id = 0) {
 	return $active_courses;
 }
 
+function flms_get_user_expired_courses($user_id = 0) {
+	if($user_id == 0) {
+		global $current_user;
+		$user_id = $current_user->ID;
+	}
+	global $wpdb;
+	$table = FLMS_ACTIVITY_TABLE;
+	$sql_query = $wpdb->prepare("SELECT * FROM $table WHERE customer_status=%s AND customer_id=%d ORDER BY id DESC", 'expired', $user_id);
+	$results = $wpdb->get_results( $sql_query, ARRAY_A ); 
+	if(!empty($results)) {
+		return $results;
+	} else {
+		return array();
+	}
+	return $active_courses;
+}
+
 function flms_get_user_completed_courses($user_id = 0) {
 	if($user_id == 0) {
 		global $current_user;
@@ -1281,6 +1317,192 @@ function flms_get_user_completed_course_list($user_id, $active_courses, $echo = 
 	}
 }
 
+function flms_get_user_expired_course_list($user_id, $completed_courses, $echo = false) {
+	global $flms_settings;
+	$show_course_progress = apply_filters('flms_my_account_show_course_progress', true);
+	$show_course_materials = apply_filters('flms_my_account_show_course_materials', true);
+	$additional_columns = apply_filters('flms_my_courses_additional_columns', array());
+	$columns = 2;
+	$extra_class = '';
+	if(!empty($additional_columns)) {
+		foreach($additional_columns as $column) {
+			$admin = true;
+			$frontend = true;
+			if(isset($column['admin_display'])) {
+				$admin = $column['admin_display'];
+			}
+			if(isset($column['frontend_display'])) {
+				$frontend = $column['frontend_display'];
+			}
+			if(is_admin()) {
+				if($admin) {
+					$columns++;
+				}
+			} else {
+				if($frontend) {
+					$columns++;
+				}
+			}
+		}
+		//$columns += count($additional_columns);
+	}
+	
+	if($show_course_materials || is_admin()) {
+		$columns++;
+	}
+	if($show_course_progress) {
+		$columns++;
+	}
+	if(flms_is_module_active('course_numbers')) {
+		$columns++;
+	}
+	if($columns < 4) {
+		$extra_class .= ' span-last-col';
+	}
+	$extra_class .= ' columns-'.$columns;
+	$date_format = apply_filters('flms_my_courses_date_format', get_option('date_format'));
+	$course_label = 'Course';
+	if(isset($flms_settings['labels']["course_singular"])) {
+		$course_label = $flms_settings['labels']["course_singular"];
+	}
+	$course_materials_module = new FLMS_Module_Course_Materials();
+	$list = '<div class="my-courses-list course-list-item '.$extra_class.'">';
+		$list .= '<div class="course-name flms-font-bold flms-desktop-only">'.$course_label.' Name</div>';
+		//$list .= '<div class="course-meta">';
+		if(flms_is_module_active('course_numbers')) {
+			$list .= '<div class="flms-font-bold flms-desktop-only">'.$course_label.' Number</div>';
+		}
+		$list .= '<div class="flms-font-bold flms-desktop-only">Enrolled</div>';
+		if($show_course_progress) {
+			$list .= '<div class="flms-font-bold flms-desktop-only">Progress</div>';
+		}
+		if(is_admin()) {
+			$list .= '<div class="actions flms-font-bold flms-desktop-only">Actions</div>';
+		} else {
+			$list .= '<div class="actions flms-font-bold flms-desktop-only">Expired</div>';
+		}
+		
+			//$list .= '</div>';
+		//$list .= '</div>';
+		foreach($completed_courses as $active_course) {
+			$course_id = $active_course['course_id'];
+			$course_version = $active_course['course_version'];
+			$course = new FLMS_Course($course_id);
+			global $flms_active_version;
+			$flms_active_version = $course_version;
+			$flms_user_activity = flms_get_user_activity($user_id, $course_id, $course_version);
+			$steps_completed = maybe_unserialize($active_course['steps_completed']);
+			$title = $course->get_course_version_name($course_version);
+			$link_title = 'View '.strip_tags($title);
+			
+			$permalink = $course->get_course_version_permalink($course_version,true);
+			if(is_admin()) {
+				$permalink = get_edit_post_link($course_id).'&set-course-version='.$course_version;
+			}
+
+			
+			//$list .= '<div class="course-list-item '.$extra_class.'">';
+			if(is_admin()) {
+				$list .= '<div class="course-name" data-label="'.$course_label.':"><a href="'.$permalink.'" title="'.$link_title.'">'.$title.'</a></div>';
+			} else {
+				$list .= '<div class="course-name" data-label="'.$course_label.':">'.$title.'</div>';
+			}
+				//$list .= '<div class="course-meta">';
+					if(flms_is_module_active('course_numbers')) {
+						$course_numbers = new FLMS_Module_Course_Numbers();
+						$course_number = $course_numbers->get_course_number($course_id, $course_version);
+						if($course_number == '' && is_admin()) {
+							$course_number = 'N/A';
+						}
+						$list .= '<div data-label="'.$course_label.' Number:">'.$course_number.'</div>';
+					}
+					$list .= '<div data-label="Enrolled:">';
+					$identifier = str_replace(':','-',$active_course);
+					$list .= date($date_format, strtotime($active_course['enroll_date']));
+					$list .= '</div>';
+					$completed = 0;
+					if(!is_array($steps_completed)) {
+						$completed = 0;
+					} else {
+						$completed = count($steps_completed);
+					}
+					$course = new FLMS_Course($course_id);
+					global $flms_active_version;
+					$flms_active_version = $course_version;
+					$steps = $course->get_all_course_steps();
+					$steps_count = count($steps);
+					if($steps_count == 0) {
+						$percent = '0%';
+					} else {
+						$percent = absint(100 * (absint($completed) / absint($steps_count))).'%';
+					}
+					if($show_course_progress) {
+						$list .= '<div data-label="Progress:">';
+						$list .= "$percent ($completed of $steps_count steps)";
+						$list .= '</div>';
+					}
+					
+					if(is_admin()) {
+						$list .= '<div class="actions" data-label="Actions:">';
+						if($completed > 0) {
+							//$list .= '<button class="profile-reset-user-progress button button-primary" data-course="'.$course_id.'" data-version="'.$course_version.'" data-user="'.$user_id.'">Reset User Progress</button>';	
+							$list .= '<a href="#" class="profile-reset-user-progress" data-course="'.$course_id.'" data-version="'.$course_version.'" data-user="'.$user_id.'">Reset User Progress</a>';	
+						}
+						//$list .= '<button class="profile-unenroll-user button button-primary" data-course="'.$course_id.'" data-version="'.$course_version.'" data-user="'.$user_id.'">Unenroll User</button>';
+						$list .= '<a href="#" class="profile-unenroll-user" data-course="'.$course_id.'" data-version="'.$course_version.'" data-user="'.$user_id.'">Unenroll User</a>';
+						$list .= '<a href="#" class="profile-complete-course" data-course="'.$course_id.'" data-version="'.$course_version.'" data-user="'.$user_id.'">Complete course</a>';
+						$exams = $course->get_course_version_exams();
+						if(is_array($exams)) {
+							//$list .= print_r($exams,true);
+							if(!empty($exams)) {
+								foreach($exams as $exam) {
+									$exam_identifier = "$exam:$course_version";
+									$meta_key = "flms_{$exam_identifier}_exam_attempts";
+									$attempts = get_user_meta($user_id, $meta_key, true);
+									$meta_key = "flms_{$exam_identifier}_exam_attempt_{$attempts}";
+									$attempts = get_user_meta($user_id, $meta_key, true);
+									if($attempts != '') {
+										$edit_text = 'Edit exam responses';
+										if(count($exams) > 1) {
+											$edit_text .= ' for &ldquo;'.flms_get_the_title($exam).'&rdquo';
+										}
+										$list .= '<a href="'.admin_url('admin.php?page=flms-exam-editor&exam_id='.$exam.'&exam_version='.$course_version.'&user_id='.$user_id).'" target="_blank">'.$edit_text.'</a>';
+									}
+								}
+							}
+						}
+						$list .= '</div>';
+						//$list .= print_r($exams,true);
+					} else {
+						$list .= '<div class="actions" data-label="Expiration">';
+							if(flms_is_module_active('course_expiration') && !is_admin()) {
+								$course_expiration = new FLMS_Module_Course_Expiration();
+								$expiration_notice = $course_expiration->get_course_expiration_date($course_id, $course_version);
+								if($expiration_notice != '') {
+									$list .= $expiration_notice;
+								}
+								
+								//
+
+							}
+						$list .= '</div>';
+					}
+					
+
+					
+					//}
+				//$list.= '</div>';
+			//$list.= '</div>';
+			$list .= '<div class="flms-row-separator flms-background-border"></div>';
+		}
+	$list .= '</div>';
+	if($echo) {
+		echo $list;
+	} else {
+		return $list;
+	}
+}
+
 function flms_get_user_active_course_list($user_id, $completed_courses, $echo = false) {
 	global $flms_settings;
 	$show_course_progress = apply_filters('flms_my_account_show_course_progress', true);
@@ -1385,6 +1607,18 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 			$flms_user_activity = flms_get_user_activity($user_id, $course_id, $course_version);
 			$steps_completed = maybe_unserialize($active_course['steps_completed']);
 			$title = $course->get_course_version_name($course_version);
+			$link_title = 'View '.strip_tags($title);
+			if(flms_is_module_active('course_expiration') && !is_admin()) {
+				$course_expiration = new FLMS_Module_Course_Expiration();
+				$expiration_notice = $course_expiration->get_course_expiration_text($course_id, $course_version);
+				if($expiration_notice != '') {
+					$title .= ' <div class="flms-tooltip" data-tooltip="'.$expiration_notice.'"></div>';
+				}
+				
+				//
+
+			}
+
 			$permalink = $course->get_course_version_permalink($course_version,true);
 			if(is_admin()) {
 				$permalink = get_edit_post_link($course_id).'&set-course-version='.$course_version;
@@ -1392,7 +1626,7 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 
 			
 			//$list .= '<div class="course-list-item '.$extra_class.'">';
-				$list .= '<div class="course-name" data-label="'.$course_label.':"><a href="'.$permalink.'" title="View '.strip_tags($title).'">'.$title.'</a></div>';
+				$list .= '<div class="course-name" data-label="'.$course_label.':"><a href="'.$permalink.'" title="'.$link_title.'">'.$title.'</a></div>';
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
