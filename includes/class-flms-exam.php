@@ -136,7 +136,7 @@ class FLMS_Exam {
 			$remaining = max(($max_attempts + $additional_attempts) - $attempts, 0);
 			//$remaining = 1;
 			
-			
+			$buttons = '';
 			if($last_attempt != '') {
 				$graded = $exam_settings['exam_is_graded'];
 				if($graded == 'auto') {
@@ -157,111 +157,141 @@ class FLMS_Exam {
 					$score_string = preg_replace('/(^| )a ([8])/', '$1an $2', 'a '.$score);
 					$exam_label = flms_get_label('exam_singular');
 					if($passed) {
-						$exam_string = $exam_label.' passed! You scored '.$score_string.'% ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).';
-						$exam_feedback = apply_filters('flms_exam_passed_string',$exam_string,$score,$last_attempt['correct'],$last_attempt['total'],$flms_exam_id);
-						$content .= '<p>'.$exam_feedback;
-					} else {
-						$exam_string = 'You did not pass the '.strtolower($exam_label).'. You scored '.$score_string.'% on your last attempt ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).';
-						$exam_feedback = apply_filters('flms_exam_failed_string',$exam_string,$score,$last_attempt['correct'],$last_attempt['total'],$flms_exam_id);
-						$content .= '<p>'.$exam_feedback;
-					}
-					if($score < $minimum) {
-						$content .= ' The minimum passing grade is '.$minimum.'%';
-					}
-					$content .= '</p>';
-					
-					if($attempts > 0 && !$passed) {
-						if($max_attempts == -1) {
-							$content .= "<p>You can attempt this exam as many times as you would like.</p>";
-						} else if($remaining == 0) {
-							$content .= "<p>".apply_filters('flms_no_attempts_remaining','No attempts remaining.')."</p>";
-						} else {
-							$continue_text = '';
-							if($continue_exam) {
-								$continue_text = 'An '.strtolower($exam_label).' is in progress. ';
-							}
-							if($remaining == 1) {
-								$content .= "<p>$continue_text$remaining attempt remaining.</p>";
-							} else {
-								$content .= "<p>$continue_text$remaining attempts remaining.</p>";
-							}
+						$exam_string = '<p>'.$exam_label.' passed! You scored '.$score_string.'% ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).</p>';
+						//get potential content from editor
+						if(isset($exam_settings['passed-exam-content'])) {
+							$exam_string = html_entity_decode($exam_settings['passed-exam-content']);
+							//replace tmp strings
+							$exam_string = str_replace('%exam_score%',$score_string, $exam_string);
+							$exam_string = str_replace('%number_correct%',$last_attempt['correct'], $exam_string);
+							$exam_string = str_replace('%total_questions%',$last_attempt['total'], $exam_string);
+							$exam_string = do_shortcode($exam_string); 
 							
 						}
+						$exam_feedback = apply_filters('flms_exam_passed_string',$exam_string, $flms_exam_id, $score, $last_attempt['correct'], $last_attempt['total']);
+						$content .= $exam_feedback;
+					} else {
+						$exam_string = '<p>You did not pass the '.strtolower($exam_label).'. You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
+						$exam_string .= '<p>%attempts_remaining%</p>';
+						
+						if(isset($exam_settings['failed-exam-content'])) {
+							$exam_string = html_entity_decode($exam_settings['failed-exam-content']);
+						}
+
+						//replace tmp strings
+						$exam_string = str_replace('%exam_score%',$score_string, $exam_string);
+						$exam_string = str_replace('%number_correct%',$last_attempt['correct'], $exam_string);
+						$exam_string = str_replace('%total_questions%',$last_attempt['total'], $exam_string);
+						$exam_string = str_replace('%exam_passing_grade%',$minimum, $exam_string);
+						$exam_string = do_shortcode($exam_string); 
+
+						if($attempts > 0) {
+							if($max_attempts == -1) {
+								$exam_string = str_replace('%attempts_remaining%','You can attempt this exam as many times as you would like.', $exam_string);
+							} else if($remaining == 0) {
+								$no_remaining = apply_filters('flms_no_attempts_remaining','No attempts remaining.');
+								$exam_string = str_replace('%attempts_remaining%',$no_remaining, $exam_string);
+							} else {
+								$continue_text = '';
+								if($continue_exam) {
+									$continue_text = 'An '.strtolower($exam_label).' is in progress. ';
+								}
+								if($remaining == 1) {
+									$exam_string = str_replace('%attempts_remaining%',"$remaining attempt remaining", $exam_string);
+								} else {
+									$exam_string = str_replace('%attempts_remaining%',"$remaining attempts remaining", $exam_string);
+								}
+								
+							}
+						} else {
+							$exam_string = str_replace('%attempts_remaining%','', $exam_string);
+						}
+
+						$exam_feedback = apply_filters('flms_exam_failed_string',$exam_string, $flms_exam_id, $score, $last_attempt['correct'], $last_attempt['total'], $remaining);
+						$content .= $exam_feedback;
 					}
+					
+					
 					//if($passed) {
 						
 					//}
 					//echo '<pre>'.print_r($last_attempt,true).'</pre>';
 				}
 				
-				if(($exam_settings['exam_review_enabled'] == 'active' || $exam_settings['exam_review_enabled'] == 1) && !$continue_exam) {
-					$review_exam_text = apply_filters('flms_review_exam_button_text', 'Review');
-					if($passed) {
-						if(apply_filters('flms_review_completed_exam', true, $flms_course_id, $flms_active_version, $flms_exam_id)) {
-							$content .= '<button id="review_exam" class="button button-primary">'.$review_exam_text.'</button>';
-						}
-					} else {
-						if(apply_filters('flms_review_incomplete_exam', true, $flms_course_id, $flms_active_version, $flms_exam_id)) {
-							$content .= '<button id="review_exam" class="button button-primary">'.$review_exam_text.'</button>';
-						}
-					}
-				}
 				
-				if($passed) {
-					$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
-					if($completed) {
-						if(flms_is_module_active('course_certificates')) {
-							if(apply_filters('flms_show_course_certificate_in_exam', true)) {
-								$flms_template = new FLMS_Template();
-								$content .= $flms_template->flms_get_all_course_certificates(1, false, false, 'exam');
-								/*$course_certificates = new FLMS_Module_Course_Certificates();
-								$label = $course_certificates->get_certificate_label();
-								$rewrite = $course_certificates->get_certificate_permalink();
-								$link = '/'.$rewrite.'/'.$flms_course_id.'/'.$flms_active_version.'/'.$current_user->ID;
-								$label = 'View '.$label;
-								//link needs updating
-								$content .= '<button class="button button-secondary flms-button-has-link" data-flms-button-link="'.$link.'" data-name="'.$label.'">'.$label.'</button>';
-								*/
+					if(($exam_settings['exam_review_enabled'] == 'active' || $exam_settings['exam_review_enabled'] == 1) && !$continue_exam) {
+						$review_exam_text = apply_filters('flms_review_exam_button_text', 'Review');
+						if($passed) {
+							if(apply_filters('flms_review_completed_exam', true, $flms_course_id, $flms_active_version, $flms_exam_id)) {
+								$buttons .= '<button id="review_exam" class="button button-primary">'.$review_exam_text.'</button>';
+							}
+						} else {
+							if(apply_filters('flms_review_incomplete_exam', true, $flms_course_id, $flms_active_version, $flms_exam_id)) {
+								$buttons .= '<button id="review_exam" class="button button-primary">'.$review_exam_text.'</button>';
 							}
 						}
 					}
-				}
-			}
-			$exam_link = '';
-			$show_print_exam = apply_filters('flms_show_print_exam_button',true, $flms_exam_id, $flms_course_id, $flms_active_version);
-			if($show_print_exam) {
-				$exam_label = flms_get_label('exam_singular');
-				$print_label = apply_filters('flms_print_exam_label', "Print $exam_label");
-				$exam_permalink = $flms_settings["custom_post_types"]["exam_permalink"];
-				$print_link = trailingslashit(get_bloginfo('url')).'print-'.$exam_permalink.'/'.$flms_exam_id.'/'.$flms_active_version.'/';
-				$exam_link = '<button data-flms-button-link="'.$print_link.'" data-name="'.$print_label.'" class="flms-button-has-link button button-secondary">'.$print_label.'</button>';
-			}
-			if($continue_exam && !$passed) {
-				$exam_label = $exam_settings['exam_resume_label'];
-				if($exam_label == '') {
-					$exam_label = $flms_settings['labels']['exam_resume_label'];
-				}
-				$content .= '<button id="resume_exam" class="button button-primary">'.$exam_label.'</button>';
-				$content .= $exam_link;
-			} else {
-				$exam_label = $exam_settings['exam_start_label'];
-				if($exam_label == '') {
-					$exam_label = $flms_settings['labels']['exam_start_label'];
-				}
-				
-				
-				if(!$passed) {
-					if($remaining > 0 || $max_attempts == -1) {
-						if($last_attempt != '') {
-							$exam_label = apply_filters('flms_retry_exam_label', $exam_label, $flms_exam_id, $flms_course_id, $flms_active_version );
-						} else {
-							$exam_label = apply_filters('flms_start_exam_label', $exam_label, $flms_exam_id, $flms_course_id, $flms_active_version );
+					
+					if($passed) {
+						$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+						if($completed) {
+							if(flms_is_module_active('course_certificates')) {
+								if(apply_filters('flms_show_course_certificate_in_exam', true)) {
+									$flms_template = new FLMS_Template();
+									$buttons .= $flms_template->flms_get_all_course_certificates(1, false, false, 'exam');
+									/*$course_certificates = new FLMS_Module_Course_Certificates();
+									$label = $course_certificates->get_certificate_label();
+									$rewrite = $course_certificates->get_certificate_permalink();
+									$link = '/'.$rewrite.'/'.$flms_course_id.'/'.$flms_active_version.'/'.$current_user->ID;
+									$label = 'View '.$label;
+									//link needs updating
+									$content .= '<button class="button button-secondary flms-button-has-link" data-flms-button-link="'.$link.'" data-name="'.$label.'">'.$label.'</button>';
+									*/
+								}
+							}
 						}
-						$content .= '<button id="start_exam" class="button button-primary">'.$exam_label.'</button>';
-						$content .= $exam_link;
 					}
-				} 
+
 			}
+
+			$content .= '<section>';
+				$content .= $buttons;
+				$exam_link = '';
+				$show_print_exam = apply_filters('flms_show_print_exam_button',true, $flms_exam_id, $flms_course_id, $flms_active_version);
+				if($show_print_exam) {
+					$exam_label = flms_get_label('exam_singular');
+					$print_label = apply_filters('flms_print_exam_label', "Print $exam_label");
+					$exam_permalink = $flms_settings["custom_post_types"]["exam_permalink"];
+					$print_link = trailingslashit(get_bloginfo('url')).'print-'.$exam_permalink.'/'.$flms_exam_id.'/'.$flms_active_version.'/';
+					$exam_link = '<button data-flms-button-link="'.$print_link.'" data-name="'.$print_label.'" class="flms-button-has-link button button-secondary">'.$print_label.'</button>';
+				}
+				if($continue_exam && !$passed) {
+					$exam_label = $exam_settings['exam_resume_label'];
+					if($exam_label == '') {
+						$exam_label = $flms_settings['labels']['exam_resume_label'];
+					}
+					$content .= '<button id="resume_exam" class="button button-primary">'.$exam_label.'</button>';
+					$content .= $exam_link;
+				} else {
+					$exam_label = $exam_settings['exam_start_label'];
+					if($exam_label == '') {
+						$exam_label = $flms_settings['labels']['exam_start_label'];
+					}
+					
+					
+					if(!$passed) {
+						if($remaining > 0 || $max_attempts == -1) {
+							if($last_attempt != '') {
+								$exam_label = apply_filters('flms_retry_exam_label', $exam_label, $flms_exam_id, $flms_course_id, $flms_active_version );
+							} else {
+								$exam_label = apply_filters('flms_start_exam_label', $exam_label, $flms_exam_id, $flms_course_id, $flms_active_version );
+							}
+							$content .= '<button id="start_exam" class="button button-primary">'.$exam_label.'</button>';
+							$content .= $exam_link;
+						}
+					} 
+				}
+			$content .= '</section>';
 
 			$content .= apply_filters('flms_after_exam_buttons', '', $flms_exam_id, $passed, $current_user->ID, $flms_user_progress, $flms_course_id, $flms_active_version);
 			$content .= '</div>';

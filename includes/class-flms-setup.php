@@ -215,6 +215,11 @@ class FLMS_Setup {
 							'read_private_posts' => 'read_private_posts'
 						);
 						$args['map_meta_cap'] = true;
+						/*if($post_type['internal_permalink'] == 'flms-exams') {
+							$args['supports'] = array('title','thumbnail','custom_fields');
+						} else {
+							$args['supports'] = array('title','editor','thumbnail','custom_fields');
+						}*/
 						$args['supports'] = array('title','editor','thumbnail','custom_fields');
 					} else {
 						$args['supports'] = array('title','author','excerpt','thumbnail','custom_fields'); //'editor',

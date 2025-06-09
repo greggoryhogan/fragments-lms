@@ -227,7 +227,11 @@ class FLMS_Module_Course_expiration {
         $flms_course_version_content = get_post_meta($course_id,'flms_version_content',true);	
         if(isset($flms_course_version_content[$course_version]['course_expiration'])) {
             if($flms_course_version_content[$course_version]['course_expiration'] != '') {
-                return true;
+                if(isset($content['course_expiration']['version_expires'])) {
+				    if($content['course_expiration']['version_expires'] != '') {
+                        return true;
+                    }
+                }
             }
         }
         return false;

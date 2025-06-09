@@ -160,6 +160,14 @@ class FLMS_Course {
         update_post_meta($flms_course_id, 'flms_version_content', $flms_course_version_content);
 	}
 
+	public function get_course_version_field($field) {
+		global $flms_course_id, $flms_course_version_content, $flms_active_version;
+		if(isset($flms_course_version_content["$flms_active_version"][$field])) {
+			return $flms_course_version_content["$flms_active_version"][$field];
+		}
+		return '';
+	}
+
 	public function get_course_version_name($course_version) {
 		global $flms_course_id, $flms_course_version_content, $flms_latest_version;
 		$force_version_for_latest = false;
@@ -286,4 +294,5 @@ class FLMS_Course {
 		$exams = array_merge($exams, $course_exams);
 		return $exams;
 	}
+
 }

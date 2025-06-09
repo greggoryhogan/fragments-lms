@@ -49,6 +49,7 @@ if ( ! class_exists( 'FLMS_Email_Customer_Completed_Course' ) && class_exists('W
             $this->course_version = $course_version;
             $course = new FLMS_Course($course_id, $course_version);
             $this->course_title = $course->get_course_version_name($course_version);
+            $this->flms_additional_content = $course->get_course_version_field('email_additional_content_completed');
             $this->recipient = $this->user->user_email;
 
             if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
@@ -65,6 +66,7 @@ if ( ! class_exists( 'FLMS_Email_Customer_Completed_Course' ) && class_exists('W
                 'course_id' => $this->course_id,
                 'course_version' => $this->course_version,
                 'course_title' => $this->course_title,
+                'flms_additional_content' => $this->flms_additional_content,
                 'email_heading' => $this->get_heading(),
                 'sent_to_admin' => false,
                 'plain_text'    => false,

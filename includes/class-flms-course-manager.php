@@ -88,6 +88,7 @@ class FLMS_Course_Manager {
 		}
 		echo '<div class="flms-tabs exam-tabs theme-color">';
 			echo '<div class="tab is-active" data-tab="#options">Settings</div>';
+			echo '<div class="tab" data-tab="#exam-content">Content</div>';
 			echo '<div class="tab" data-tab="#labels">Labels</div>';
 			echo '<div class="tab" data-tab="#flms-exam-questions">Questions</div>';
 		echo '</div>';
@@ -296,6 +297,48 @@ class FLMS_Course_Manager {
 				echo '<p class="description"></p>';
 				echo '<input type="number" name="flms_time_limit" value="'.$time_limit.'" class="flms-full-width" />';
 			echo '</div>';
+		echo '</div>';
+		echo '<div class="flms-tab-section" id="exam-content">';
+		
+			echo '<div>';
+				echo '<label>Passed exam content</label>';
+				echo '<p class="description">The content to be displayed when a user passes the exam</p>';
+				$exam_label = flms_get_label('exam_singular');
+				$default = '<p>'.$exam_label.' passed! You scored %exam_score%% (%number_correct% of %total_questions% questions).</p>';
+				if(isset($exam_settings['passed-exam-content'])) {
+					$default = html_entity_decode($exam_settings['passed-exam-content']);
+				}
+				$exam_id = $post->ID;
+				$editor_id = "{$exam_id}_passed_exam_content";
+				remove_all_filters('the_editor_content');
+				$default_content = apply_filters('the_editor_content', $default);
+				wp_editor($default_content, $editor_id, array(
+					'textarea_name' => "flms-passed-exam-content",
+					'textarea_rows' => 10,
+				));
+				echo '<p class="description placeholders"><strong>Available placeholders:</strong><span>%exam_score%</span><span>%number_correct%</span><span>%total_questions%</span></p>';
+			echo '</div>';
+
+			echo '<div>';
+				echo '<label>Failed exam content</label>';
+				echo '<p class="description">The content to be displayed when a user fails the exam</p>';
+				$exam_label = flms_get_label('exam_singular');
+				$default = '<p>You did not pass the '.strtolower($exam_label).'. You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
+				$default .= '<p>%attempts_remaining%</p>';
+				if(isset($exam_settings['failed-exam-content'])) {
+					$default = html_entity_decode($exam_settings['failed-exam-content']);
+				}
+				$exam_id = $post->ID;
+				$editor_id = "{$exam_id}_failed_exam_content";
+				remove_all_filters('the_editor_content');
+				$default_content = apply_filters('the_editor_content', $default);
+				wp_editor($default_content, $editor_id, array(
+					'textarea_name' => "flms-failed-exam-content",
+					'textarea_rows' => 10,
+				));
+				echo '<p class="description placeholders"><strong>Available placeholders:</strong><span>%exam_score%</span><span>%number_correct%</span><span>%total_questions%</span><span>%exam_passing_grade%</span></p>';
+			echo '</div>';
+			
 		echo '</div>';
 		echo '<div class="flms-tab-section" id="labels">';
 		
@@ -580,6 +623,13 @@ class FLMS_Course_Manager {
 				'callback' => $this->get_product_options()
 			);
 		}
+		$metabox_fields['additiona-options'] = array(
+			'label' => "Course Emails",
+			'id' => 'course_email',
+			'description' => '',
+			'tooltip' => '',
+			'callback' => $this->get_email_options()
+		);
 		$this->flms_settings_output($metabox_fields);
 	}
 
@@ -856,6 +906,60 @@ class FLMS_Course_Manager {
 		} else {
 			$return .= 'Please enable an ecommerce module to sell your courses.';
 		}
+		return $return;
+	}
+
+	public function get_email_options() {
+		global $post;
+		$return = '';
+		//if(flms_is_module_active('woocommerce')) {
+		//	$woo = new FLMS_Module_Woocommerce();
+			$course_id = $post->ID;
+			$active_version = get_post_meta($course_id,'flms_course_active_version',true);
+			$versions = get_post_meta($course_id,'flms_version_content',true);
+			if(!is_array($versions)) {
+				$versions = array();
+				$active_version = 1;
+				$versions[$active_version] = array(
+					'version_name' => 'Version 1',
+					'version_permalink' => 'version-1',
+					'email_additional_content_completed' => '',
+				);
+			}
+
+			global $flms_latest_version, $flms_course_version_content;
+			krsort($versions);
+			if(is_array($versions)) {
+				$version_content = $versions["{$active_version}"];
+				$return .= '<div class="settings-field">';
+					$return .= '<label>Course completed additional content ';
+					//$return .= '<div class="flms-tooltip" data-tooltip="<strong>Open:</strong> Any logged in user can enroll in the course.<br><strong>Purchase:</strong> The course must be purchased to enroll. Requires an ecommerce module to be enabled in the <a href=&quot;'.admin_url('admin.php?page=flms-setup').'&quot; target=&quot;_blank&quot;>plugin settings</a>. Assign this course to a product for users to enroll."></div>';
+					$return .= '</label>';
+					$return .= '<p class="description">This content will be added to the course completed email.</p>';
+					if (class_exists('WC_Emails')) {
+						$email = WC()->mailer()->emails['FLMS_Email_Customer_Completed_Course'];
+		
+						if( !$email->is_enabled() ) {
+							$return .= '<p class="description"><strong>This email is currently deactivated.</strong></p>';
+						}
+						
+					}
+					//email_additional_content
+					$default_content = '';
+					if(isset($version_content['email_additional_content_completed'])) {
+						$default_content = $version_content['email_additional_content_completed'];
+					}
+					$editor_id = "{$course_id}_completed_course_email_additional_content";
+					ob_start();
+					wp_editor($default_content, $editor_id, array(
+						'textarea_name' => "flms-completed-course-email-content",
+						'media_buttons' => false,
+						'textarea_rows' => 10,
+					));
+					$return .= ob_get_clean();
+				$return .= '</div>';
+			}
+		
 		return $return;
 	}
 
@@ -2072,6 +2176,16 @@ class FLMS_Course_Manager {
 			}
 		}
 
+		//flms_debug($data);
+		if(isset($data['flms-passed-exam-content'])) {
+			$allowed_html = wp_kses_allowed_html( 'post' );
+			$settings['passed-exam-content'] = wp_kses( $data['flms-passed-exam-content'],$allowed_html);
+		}
+		if(isset($data['flms-failed-exam-content'])) {
+			$allowed_html = wp_kses_allowed_html( 'post' );
+			$settings['failed-exam-content'] = wp_kses( $data['flms-failed-exam-content'],$allowed_html);
+		}
+
 		$update = update_post_meta($post_id, "flms_exam_settings_$active_version", $settings);
 
 		//clear out any saved question options that users may have since questions may have changed
@@ -2227,6 +2341,12 @@ class FLMS_Course_Manager {
 		}
 		
 		$course_versioned_content["{$active_version}"]['force_version_title_on_latest'] = $force_version_display;
+
+		if(isset($postdata['flms-completed-course-email-content'])) {
+			$allowed_html = wp_kses_allowed_html( 'post' );
+			$course_versioned_content["{$active_version}"]['email_additional_content_completed'] = wp_kses($postdata['flms-completed-course-email-content'],$allowed_html);;
+		}
+		
 
 		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
 		

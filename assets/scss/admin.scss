@@ -995,8 +995,26 @@ input {
     }
 }
 #flms-exam-options {
+    .description.placeholders {
+        strong {
+            padding-right: 8px;
+        }
+        padding-top: 10px;
+        span {
+            display: block;
+            
+        }
+    }
     .flms-tabs {
         margin-top: -6px;
+    }
+    #exam-content {
+        &.is-active {
+            display: flex;
+            > div {
+                width: 100%;
+            }
+        }
     }
     #flms-exam-questions {
         &.is-active {
