@@ -296,15 +296,15 @@ class FLMS_Module_Course_expiration {
         $course_versioned_content = get_post_meta($course_id,'flms_version_content',true);
         $expirations = array();
 		foreach($course_versioned_content as $active_version => $content) {
-			if(isset($content['course_expiration']['version_expires'])) {
-				if($content['course_expiration']['version_expires'] != '') {
-					if(isset($content['course_expiration']['expiration_date'])) {
-						$expirations[] = $content['course_expiration']['expiration_date'];
-					}
-				}
-			}
+            if(isset($content['course_expiration']['version_expires'])) {
+                if($content['course_expiration']['version_expires'] != '') {
+                    if(isset($content['course_expiration']['expiration_date'])) {
+                        $expirations[] = $content['course_expiration']['expiration_date'];
+                    }
+                }
+            }   
 		}
-		delete_post_meta($course_id, 'flms_course_has_expiration_date');
+        delete_post_meta($course_id, 'flms_course_has_expiration_date');
 		if(!empty($expirations)) {
 			foreach($expirations as $expiration) {	
 				add_post_meta($course_id, 'flms_course_has_expiration_date', $expiration );

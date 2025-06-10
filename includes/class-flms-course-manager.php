@@ -306,7 +306,7 @@ class FLMS_Course_Manager {
 				$exam_label = flms_get_label('exam_singular');
 				$default = '<p>'.$exam_label.' passed! You scored %exam_score%% (%number_correct% of %total_questions% questions).</p>';
 				if(isset($exam_settings['passed-exam-content'])) {
-					$default = html_entity_decode($exam_settings['passed-exam-content']);
+					$default = $exam_settings['passed-exam-content'];
 				}
 				$exam_id = $post->ID;
 				$editor_id = "{$exam_id}_passed_exam_content";
@@ -326,7 +326,7 @@ class FLMS_Course_Manager {
 				$default = '<p>You did not pass the '.strtolower($exam_label).'. You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
 				$default .= '<p>%attempts_remaining%</p>';
 				if(isset($exam_settings['failed-exam-content'])) {
-					$default = html_entity_decode($exam_settings['failed-exam-content']);
+					$default = $exam_settings['failed-exam-content'];
 				}
 				$exam_id = $post->ID;
 				$editor_id = "{$exam_id}_failed_exam_content";
@@ -336,7 +336,7 @@ class FLMS_Course_Manager {
 					'textarea_name' => "flms-failed-exam-content",
 					'textarea_rows' => 10,
 				));
-				echo '<p class="description placeholders"><strong>Available placeholders:</strong><span>%exam_score%</span><span>%number_correct%</span><span>%total_questions%</span><span>%exam_passing_grade%</span></p>';
+				echo '<p class="description placeholders"><strong>Available placeholders:</strong><span>%exam_score%</span><span>%number_correct%</span><span>%total_questions%</span><span>%exam_passing_grade%</span><span>%attempts_remaining%</span></p>';
 			echo '</div>';
 			
 		echo '</div>';

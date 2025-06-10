@@ -157,10 +157,11 @@ class FLMS_Exam {
 					$score_string = preg_replace('/(^| )a ([8])/', '$1an $2', 'a '.$score);
 					$exam_label = flms_get_label('exam_singular');
 					if($passed) {
-						$exam_string = '<p>'.$exam_label.' passed! You scored '.$score_string.'% ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).</p>';
+						$exam_string = '<h3>'.$exam_label.' passed!</h3>';
+						$exam_string .= '<p>You scored '.$score_string.'% ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).</p>';
 						//get potential content from editor
 						if(isset($exam_settings['passed-exam-content'])) {
-							$exam_string = html_entity_decode($exam_settings['passed-exam-content']);
+							$exam_string = wpautop(html_entity_decode($exam_settings['passed-exam-content']));
 							//replace tmp strings
 							$exam_string = str_replace('%exam_score%',$score_string, $exam_string);
 							$exam_string = str_replace('%number_correct%',$last_attempt['correct'], $exam_string);
@@ -171,11 +172,12 @@ class FLMS_Exam {
 						$exam_feedback = apply_filters('flms_exam_passed_string',$exam_string, $flms_exam_id, $score, $last_attempt['correct'], $last_attempt['total']);
 						$content .= $exam_feedback;
 					} else {
-						$exam_string = '<p>You did not pass the '.strtolower($exam_label).'. You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
+						$exam_string = '<h3>You did not pass the '.strtolower($exam_label).'.</h3>';
+						$exam_string .= '<p>You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
 						$exam_string .= '<p>%attempts_remaining%</p>';
 						
 						if(isset($exam_settings['failed-exam-content'])) {
-							$exam_string = html_entity_decode($exam_settings['failed-exam-content']);
+							$exam_string = wpautop(html_entity_decode($exam_settings['failed-exam-content']));
 						}
 
 						//replace tmp strings
