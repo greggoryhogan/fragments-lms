@@ -304,7 +304,7 @@ class FLMS_Course_Manager {
 				echo '<label>Passed exam content</label>';
 				echo '<p class="description">The content to be displayed when a user passes the exam</p>';
 				$exam_label = flms_get_label('exam_singular');
-				$default = '<p>'.$exam_label.' passed! You scored %exam_score%% (%number_correct% of %total_questions% questions).</p>';
+				$default = '<h3>'.$exam_label.' passed!</h3><p>You scored %exam_score%% (%number_correct% of %total_questions% questions).</p>';
 				if(isset($exam_settings['passed-exam-content'])) {
 					$default = $exam_settings['passed-exam-content'];
 				}
@@ -323,7 +323,7 @@ class FLMS_Course_Manager {
 				echo '<label>Failed exam content</label>';
 				echo '<p class="description">The content to be displayed when a user fails the exam</p>';
 				$exam_label = flms_get_label('exam_singular');
-				$default = '<p>You did not pass the '.strtolower($exam_label).'. You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
+				$default = '<h3>You did not pass the '.strtolower($exam_label).'.</h3><p>You scored %exam_score%% on your last attempt (%number_correct% of %total_questions% questions). The minimum passing grade is %exam_passing_grade%%.</p>';
 				$default .= '<p>%attempts_remaining%</p>';
 				if(isset($exam_settings['failed-exam-content'])) {
 					$default = $exam_settings['failed-exam-content'];
