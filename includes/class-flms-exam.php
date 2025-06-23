@@ -343,7 +343,7 @@ class FLMS_Exam {
 		}
 
 		$reset_questions = 1;
-		if($exam_type == 'sample-draw') {
+		if($exam_type != 'standard') {
 			if(isset($exam_settings["reset_questions_during_failure"])) {
 				$reset_questions = $exam_settings["reset_questions_during_failure"];
 			}
