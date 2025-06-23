@@ -134,7 +134,7 @@ class FLMS_Course_Manager {
 					$default = $exam_settings['reset_questions_during_failure'];
 				}
 				echo '<label class="has-tooltip">Question Reset on Failure';
-				echo '<div class="flms-tooltip" data-tooltip="<strong>Retain Questions:</strong> Questions remain the same when a user fails<br><strong>Reset Questions:</strong> Questions are when a user fails"></div>';
+				echo '<div class="flms-tooltip" data-tooltip="<strong>Retain Questions:</strong> Questions remain the same when a user fails<br><strong>Reset Questions:</strong> Questions are reset when a user fails"></div>';
 				echo '</label>';
 				echo '<select name="flms_exam_question_reset" id="flms_exam_question_reset" class="flms-full-width">';
 				foreach($options as $k => $v) {
