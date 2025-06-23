@@ -341,10 +341,17 @@ class FLMS_Exam {
 		if(isset($exam_settings["exam_type"])) {
 			$exam_type = $exam_settings["exam_type"];
 		}
+
+		$reset_questions = 1;
+		if($exam_type == 'sample-draw') {
+			if(isset($exam_settings["reset_questions_during_failure"])) {
+				$reset_questions = $exam_settings["reset_questions_during_failure"];
+			}
+		}
 		
-		$meta_key = "flms_{$exam_identifier}_exam_answers";
+		$current_exam_answers = "flms_{$exam_identifier}_exam_answers";
 		//copy answers to exam attemp answers
-		$existing = get_user_meta($user_id, $meta_key, true);
+		$existing = get_user_meta($user_id, $current_exam_answers, true);
 		if($existing == '') {
 			$existing = array();
 		}
@@ -442,10 +449,14 @@ class FLMS_Exam {
 		
 		//now maybe delete the saved answers, any non standard exam must have answers reset because the questions will change between attempts
 		$course_id = flms_get_course_id($flms_exam_id);
-		if(apply_filters('flms_reset_exam_answers_after_attempt', true, $course_id, $flms_active_version, $flms_exam_id ) || $exam_type != 'standard') {
-			delete_user_meta($user_id, $meta_key);
+		$reset_questions_global = 1;
+		$global_exam_question_reset_option = apply_filters('flms_reset_exam_answers_after_attempt', true, $course_id, $flms_active_version, $flms_exam_id);
+		if($global_exam_question_reset_option === false) {
+			$reset_questions_global = 0;
+		}
+		if( $reset_questions_global == 1 || ($exam_type != 'standard' && $reset_questions > 0)) {
+			delete_user_meta($user_id, $current_exam_answers);
 		} 
-
 		//delete course access restrictions if one is set
 		$meta_key = 'flms_content_restricted_by_exam';
 		$has_restrictions = get_user_meta($user_id, $meta_key);

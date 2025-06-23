@@ -753,6 +753,7 @@ class FLMS_Template {
 					$exam_label = flms_get_label('exam_singular');
 					$before = 'Because you did not pass the '.strtolower($exam_label).', ';
 					$message = $before . $message;
+					$message = apply_filters('flms_course_reset_exam_message', $message);
 				}
 			}
 			echo flms_alert($message, true);

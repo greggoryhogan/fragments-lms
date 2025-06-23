@@ -776,8 +776,20 @@ class FLMS_Ajax {
 
 		if($review == 0) {
 			if($reset_exam_progress == 1) {
-				//delete exam questions
-				delete_user_meta($user_id, "flms_current_exam_questions_{$exam_id}_$version_index");
+				$exam_type = 'standard';
+				if(isset($exam_settings["exam_type"])) {
+					$exam_type = $exam_settings["exam_type"];
+				}
+				$reset_questions = 1;
+				if($exam_type == 'sample-draw') {
+					if(isset($exam_settings["reset_questions_during_failure"])) {
+						$reset_questions = $exam_settings["reset_questions_during_failure"];
+					}
+				}
+				//maybe delete exam questions the user answers, this is different than the saved options they have for their exam questions in flms-exam.php line 458
+				if($reset_questions > 0) {
+					delete_user_meta($user_id, "flms_current_exam_questions_{$exam_id}_$version_index");
+				}
 
 				update_user_meta($user_id, "flms_{$exam_identifier}_exam_in_progress", 1);
 				

@@ -241,7 +241,7 @@ class FLMS_Course_Progress {
 			$meta_key = "flms_{$exam_identifier}_exam_answers";
 			delete_user_meta($user_id, $meta_key);
 
-			delete_user_meta($user_id, "flms_current_exam_questions_{$exam_id}_$version");
+			delete_user_meta($user_id, "flms_current_exam_questions_{$exam}_$version");
 
 			$meta_key = "flms_{$exam_identifier}_exam_attempts";
 			$attempts = get_user_meta($user_id, $meta_key, true);

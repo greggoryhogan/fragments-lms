@@ -124,6 +124,29 @@ class FLMS_Course_Manager {
 				echo '<input type="number" name="flms_sample_draw_question_count" value="'.$default.'" class="flms-full-width" />';
 			echo '</div>';
 
+			echo '<div class="sample-draw-exam-option">';
+				$default = 'false';
+				$options = array(
+					false => 'Retain Questions',
+					true => 'Reset Questions'
+				);
+				if(isset($exam_settings['reset_questions_during_failure'])) {
+					$default = $exam_settings['reset_questions_during_failure'];
+				}
+				echo '<label class="has-tooltip">Question Reset on Failure';
+				echo '<div class="flms-tooltip" data-tooltip="<strong>Retain Questions:</strong> Questions remain the same when a user fails<br><strong>Reset Questions:</strong> Questions are when a user fails"></div>';
+				echo '</label>';
+				echo '<select name="flms_exam_question_reset" id="flms_exam_question_reset" class="flms-full-width">';
+				foreach($options as $k => $v) {
+					echo '<option value="'.$k.'"';
+					if($k == $default) {
+						echo ' selected';
+					}
+					echo '>'.$v.'</option>';
+				}
+				echo '</select>';
+			echo '</div>';
+
 			echo '<div>';
 				echo '<label class="has-tooltip">Course content access ';
 				echo '<div class="flms-tooltip" data-tooltip="<strong>Open book:</strong> Course content can be accessed while the user is taking an exam<br><strong>Closed book:</strong> Course content is restricted until the exam is completed."></div>';
@@ -2087,6 +2110,9 @@ class FLMS_Course_Manager {
 		}
 		if(isset($data['flms_sample_draw_question_count'])) {
 			$settings['sample-draw-question-count'] = (int) $data['flms_sample_draw_question_count'];
+		}
+		if(isset($data['flms_exam_question_reset'])) {
+			$settings['reset_questions_during_failure'] = (int) $data['flms_exam_question_reset'];
 		}
 		if(isset($data['flms_exam_attempts'])) {
 			$settings['exam_attempts'] = (int) $data['flms_exam_attempts'];
