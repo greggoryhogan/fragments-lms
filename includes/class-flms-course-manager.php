@@ -124,7 +124,7 @@ class FLMS_Course_Manager {
 				echo '<input type="number" name="flms_sample_draw_question_count" value="'.$default.'" class="flms-full-width" />';
 			echo '</div>';
 
-			echo '<div class="sample-draw-exam-option">';
+			echo '<div class="sample-draw-category-sample-draw-exam-option">';
 				$default = 'false';
 				$options = array(
 					false => 'Retain Questions',

@@ -30,6 +30,11 @@
             } else {
                 $('.sample-draw-exam-option').hide();
             }
+            if(exam_type == 'sample-draw' || exam_type == 'category-sample-draw') {
+                $('.sample-draw-category-sample-draw-exam-option').show();
+            } else {
+                $('.sample-draw-category-sample-draw-exam-option').hide();
+            }
         }
     }
 

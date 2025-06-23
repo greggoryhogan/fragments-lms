@@ -781,7 +781,7 @@ class FLMS_Ajax {
 					$exam_type = $exam_settings["exam_type"];
 				}
 				$reset_questions = 1;
-				if($exam_type != 'standard') {
+				if($exam_type == 'sample-draw' || $exam_type == 'category-sample-draw') {
 					if(isset($exam_settings["reset_questions_during_failure"])) {
 						$reset_questions = $exam_settings["reset_questions_during_failure"];
 					}
