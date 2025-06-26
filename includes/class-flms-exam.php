@@ -259,7 +259,15 @@ class FLMS_Exam {
 			$content .= '<section>';
 				$content .= $buttons;
 				$exam_link = '';
-				$show_print_exam = apply_filters('flms_show_print_exam_button',true, $flms_exam_id, $flms_course_id, $flms_active_version);
+				$show_print_exam = true;
+				if(isset($exam_settings['print_exam_enabled'])) {
+					$print_exam_status = $exam_settings['print_exam_enabled'];
+					if($print_exam_status == 'inactive') {
+						$show_print_exam = false; 
+					}
+				}
+
+				$show_print_exam = apply_filters('flms_show_print_exam_button',$show_print_exam, $flms_exam_id, $flms_course_id, $flms_active_version);
 				if($show_print_exam) {
 					$exam_label = flms_get_label('exam_singular');
 					$print_label = apply_filters('flms_print_exam_label', "Print $exam_label");

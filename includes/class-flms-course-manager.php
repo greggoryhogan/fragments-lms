@@ -236,6 +236,24 @@ class FLMS_Course_Manager {
 			echo '</div>';
 
 			echo '<div>';
+				echo '<label>Print Exam</label>';
+				echo '<p class="description"></p>';
+				$options = array(
+					'active' => 'Enabled',
+					'inactive' => 'Disabled',
+				);
+				echo '<select name="flms_print_exam_enabled" class="flms-full-width">';
+				foreach($options as $k => $v) {
+					echo '<option value="'.$k.'"';
+					if($k == $exam_settings['print_exam_enabled']) {
+						echo ' selected';
+					}
+					echo '>'.$v.'</option>';
+				}
+				echo '</select>';
+			echo '</div>';
+
+			echo '<div>';
 				echo '<label>Enable Exam Review</label>';
 				echo '<p class="description"></p>';
 				$options = array(
@@ -2090,6 +2108,7 @@ class FLMS_Course_Manager {
 			'exam_is_graded_using' => $flms_settings['exams']['exam_is_graded_using'],
 			'exam_attempt_action' => $flms_settings['exams']['exam_attempt_action'],
 			'exam_review_enabled' => $flms_settings['exams']['exam_review_enabled'],
+			'print_exam_enabled' => $flms_settings['exams']['print_exam_enabled'],
 			'exam_label_override' => $flms_settings['labels']['exam_singular'],
 			'question_select_type' => 'manual',
 			'exam_questions' => array(),
@@ -2140,6 +2159,9 @@ class FLMS_Course_Manager {
 		}
 		if(isset($data['flms_save_continue_enabled'])) {
 			$settings['save_continue_enabled'] = sanitize_text_field($data['flms_save_continue_enabled']);
+		}
+		if(isset($data['flms_print_exam_enabled'])) {
+			$settings['print_exam_enabled'] = sanitize_text_field($data['flms_print_exam_enabled']);
 		}
 		if(isset($data['flms_exam_is_graded'])) {
 			$settings['exam_is_graded'] = sanitize_text_field($data['flms_exam_is_graded']);

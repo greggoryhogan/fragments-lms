@@ -344,6 +344,17 @@ class FLMS_Settings {
 						'description' => 'Allows learners to save and resume progress on exams.',
 					),
 					array(
+						'label' => 'Enable Print Exam',
+						'key' => 'print_exam_enabled',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Enabled',
+							'inactive' => 'Disabled'
+						),
+						'default' => 'active',
+						'description' => 'Allows learners to print an exam before starting it.',
+					),
+					array(
 						'label' => 'Enable Exam Review',
 						'key' => 'exam_review_enabled',
 						'type' => 'radio',
