@@ -2020,12 +2020,12 @@ class FLMS_Ajax {
 							}
 						}
 						//$lesson = new FLMS_Lesson($id);
-						$title = flms_get_the_title();
+						$title = flms_get_the_title($id, 'exporter');
 						$status = get_post_status();
 						global $flms_course_id;
 						//$course = new FLMS_Course($flms_course_id);
 						if($flms_course_id > 0) {
-							$course_title = flms_get_the_title($flms_course_id);
+							$course_title = flms_get_the_title($flms_course_id, 'exporter');
 						} else {
 							$course_title = '';
 						}
@@ -2085,11 +2085,13 @@ class FLMS_Ajax {
 											'exam_questions',
 											'exam_question_categories',
 											'sample-draw-question-count',
+											'reset_questions_during_failure',
 											'cumulative_exam_questions',
 											'question_order',
 											'exam_attempts',
 											'questions_per_page',
 											'save_continue_enabled',
+											'print_exam_enabled',
 											'exam_review_enabled',
 											'exam_is_graded',
 											'exam_is_graded_using',
@@ -2099,6 +2101,8 @@ class FLMS_Ajax {
 											'exam_label_override',
 											'exam_start_label',
 											'exam_resume_label',
+											'passed-exam-content',
+											'failed-exam-content',
 										);
 										foreach($fields_to_process as $field) {
 											if(isset($exam_settings[$field])) {

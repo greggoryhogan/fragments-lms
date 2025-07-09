@@ -493,13 +493,12 @@ class FLMS_Cron {
                 if ($rows > $max_rows) {
                     break;
                 }
-
                 ++$itracker;
                 if($field_indexes['Version'] != -2) {
                     if($field_indexes['Associated Content'] != -2) {
                         $associated_content = $data[$field_indexes['Associated Content']];
                         if($associated_content == '') {
-                            $errors[] = "Skipped row $i. No associated content specified.";
+                            $errors[] = "Skipped row $itracker. No associated content specified.";
                         } else {
                             $associated_content_post_type = $data[$field_indexes['Associated Content Post Type']];
                             if($associated_content_post_type == '') {
@@ -626,6 +625,9 @@ class FLMS_Cron {
                                                 if($field_indexes['Save/Continue Enabled'] != -2) {
                                                     $settings['save_continue_enabled'] = sanitize_text_field($data[$field_indexes['Save/Continue Enabled']]);
                                                 }
+                                                if($field_indexes['Print Exam Enabled'] != -2) {
+                                                    $settings['print_exam_enabled'] = sanitize_text_field($data[$field_indexes['Print Exam Enabled']]);
+                                                }
                                                 if($field_indexes['Exam Review Enabled'] != -2) {
                                                     $settings['exam_review_enabled'] = sanitize_text_field($data[$field_indexes['Exam Review Enabled']]);
                                                 }
@@ -653,13 +655,16 @@ class FLMS_Cron {
                                                 if($field_indexes['Questions to Draw'] != -2) {
                                                     $settings['sample-draw-question-count'] = absint($data[$field_indexes['Questions to Draw']]);
                                                 }
+                                                if($field_indexes['Question Reset on Failure'] != -2) {
+                                                    $settings['reset_questions_during_failure'] = sanitize_text_field($data[$field_indexes['Question Reset on Failure']]);
+                                                }
                                                 if($field_indexes['Questions Order'] != -2) {
                                                     $settings['question_order'] = sanitize_text_field($data[$field_indexes['Questions Order']]);
                                                 }
                                                 if($field_indexes['Cumulative Exam Settings'] != -2) {
-                                                    if( strlen($value) > 0 ){
+                                                    $value = array();
+                                                    if( strlen($data[$field_indexes['Cumulative Exam Settings']]) > 0 ){
                                                         $options = explode('|',$data[$field_indexes['Cumulative Exam Settings']]);
-                                                        $value = array();
                                                         if(is_array($options)) {
                                                             if(!empty($options)) {
                                                                 $success = true;
@@ -683,7 +688,15 @@ class FLMS_Cron {
                                                     }
                                                     $settings['cumulative_exam_questions'] = $value;
                                                 }
-                                            
+                                                $allowed_html = wp_kses_allowed_html( 'post' );
+                                                if($field_indexes['Passed Exam Content'] != -2) {
+                                                    $settings['passed-exam-content'] = wp_kses( $data[$field_indexes['Passed Exam Content']],$allowed_html);
+                                                }
+                                                if($field_indexes['Failed Exam Content'] != -2) {
+                                                    $settings['failed-exam-content'] = wp_kses( $data[$field_indexes['Failed Exam Content']],$allowed_html);
+                                                }
+                                                
+                                                
                                                 $update = update_post_meta($exam_id, "flms_exam_settings_$version", $settings);
                                                 if($update === false) {
                                                     $errors[] = "Error updating $exam_id settings. Ignore if the settings for the exam have not changed.";		
@@ -693,7 +706,9 @@ class FLMS_Cron {
                                         
                                     }
                                 } else {
-                                    $errors[] = 'Could not update exam "'.$data[$field_indexes['Title']].'", associated content "'.$associated_content.'" not found.';
+                                    if($data[$field_indexes['Title']] != 'Title' && $$associated_content != 'Associated Content') {
+                                        $errors[] = 'Could not update exam "'.$data[$field_indexes['Title']].'", associated content "'.$associated_content.'" not found.';
+                                    }
                                 }
                             }
                         }

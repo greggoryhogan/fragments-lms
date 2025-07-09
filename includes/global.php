@@ -2471,11 +2471,13 @@ function flms_get_import_export_columns($type) {
 				'Exam Questions',
 				'Exam Question Categories',
 				'Questions to Draw',
+				'Question Reset on Failure',
 				'Cumulative Exam Settings',
 				'Questions Order',
 				'Exam Attempts',
 				'Question Per Page',
 				'Save/Continue Enabled',
+				'Print Exam Enabled',
 				'Exam Review Enabled',
 				'Exam is Graded',
 				'Exam is Graded Using',
@@ -2485,6 +2487,8 @@ function flms_get_import_export_columns($type) {
 				'Exam Label',
 				'Start Exam Label',
 				'Resume Exam Label',
+				'Passed Exam Content',
+				'Failed Exam Content',
 			);
 			break;
 		case 'questions': 
