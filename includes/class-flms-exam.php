@@ -158,17 +158,21 @@ class FLMS_Exam {
 					$exam_label = flms_get_label('exam_singular');
 					if($passed) {
 						$exam_string = '<h3>'.$exam_label.' passed!</h3>';
-						$exam_string .= '<p>You scored '.$score_string.'% ('.$last_attempt['correct'].' of '.$last_attempt['total'].' questions).</p>';
+						$exam_string .= '<p>You scored %exam_score%% (%number_correct% of %total_questions% questions).</p>';
 						//get potential content from editor
 						if(isset($exam_settings['passed-exam-content'])) {
-							$exam_string = wpautop(html_entity_decode($exam_settings['passed-exam-content']));
-							//replace tmp strings
-							$exam_string = str_replace('%exam_score%',$score_string, $exam_string);
-							$exam_string = str_replace('%number_correct%',$last_attempt['correct'], $exam_string);
-							$exam_string = str_replace('%total_questions%',$last_attempt['total'], $exam_string);
-							$exam_string = do_shortcode($exam_string); 
-							
+							//add extra check to make sure it's not empty
+							if($exam_settings['passed-exam-content'] != '') {
+								$exam_string = wpautop(html_entity_decode($exam_settings['passed-exam-content']));
+							}
 						}
+						
+						//replace tmp strings
+						$exam_string = str_replace('%exam_score%',$score_string, $exam_string);
+						$exam_string = str_replace('%number_correct%',$last_attempt['correct'], $exam_string);
+						$exam_string = str_replace('%total_questions%',$last_attempt['total'], $exam_string);
+						$exam_string = do_shortcode($exam_string); 
+
 						$exam_feedback = apply_filters('flms_exam_passed_string',$exam_string, $flms_exam_id, $score, $last_attempt['correct'], $last_attempt['total']);
 						$content .= $exam_feedback;
 					} else {
@@ -177,7 +181,10 @@ class FLMS_Exam {
 						$exam_string .= '<p>%attempts_remaining%</p>';
 						
 						if(isset($exam_settings['failed-exam-content'])) {
-							$exam_string = wpautop(html_entity_decode($exam_settings['failed-exam-content']));
+							//add extra check to make sure it's not empty
+							if($exam_settings['failed-exam-content'] != '') {
+								$exam_string = wpautop(html_entity_decode($exam_settings['failed-exam-content']));
+							}
 						}
 
 						//replace tmp strings
