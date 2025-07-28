@@ -2071,7 +2071,8 @@ class FLMS_Module_Woocommerce {
                     $label = flms_get_label($k);
                     if ((int) $v < 0) {
                         $reporting_label = flms_get_label('reporting_fee');
-                        wc_add_notice( 'Please accept or decline the '.$label.' '.$reporting_label, 'error' );
+                        $notice = apply_filters('flms_reporting_fee_required', "Please accept or decline the $label $reporting_label.", $label, $k);
+                        wc_add_notice($notice, 'error' );
                         $passed = false;
                     } 
                 }

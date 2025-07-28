@@ -263,7 +263,7 @@ class FLMS_Exam {
 
 			}
 
-			$content .= '<section>';
+			$content .= '<section id="exam-actions">';
 				$content .= $buttons;
 				$exam_link = '';
 				$show_print_exam = true;
