@@ -109,9 +109,12 @@ class FLMS_Module_Course_Taxonomies {
     }
 
     public function flms_course_taxonomies() {
-        echo '<div class="flms-course-taxonomies flms-course-content-section">';
-        $this->flms_get_course_taxonomies();
-        echo '</div>';
+        $taxonomies = $this->flms_get_course_taxonomies('design', false);
+        if($taxonomies != '') {
+            echo '<div class="flms-course-taxonomies flms-course-content-section">';
+                echo $taxonomies;   
+            echo '</div>';
+        }
     }
 
     public function flms_get_course_taxonomies($location = 'design', $echo = true, $show_label = true, $heading_wrap = 'h3') {

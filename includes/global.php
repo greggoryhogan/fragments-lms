@@ -3247,7 +3247,7 @@ function flms_course_filters($filters = array()) {
 								if(in_array($key, $credit_filters)) {
 									$checked = 'checked="checked"';
 								}
-								$return .= '<div><label><input type="checkbox" name="credit_type[]" value="'.$key.'" '.$checked.' />'.$label.'</label></div>';
+								$return .= '<div><label><input type="checkbox" name="credit_type[]" value="'.$key.'" '.$checked.' /> '.$label.'</label></div>';
 							}
 						}
 						$return .= '</div>';
