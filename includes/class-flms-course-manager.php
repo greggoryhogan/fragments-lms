@@ -664,12 +664,20 @@ class FLMS_Course_Manager {
 				'callback' => $this->get_product_options()
 			);
 		}
-		$metabox_fields['additiona-options'] = array(
+		$metabox_fields['additional-options'] = array(
 			'label' => "Course Emails",
 			'id' => 'course_email',
 			'description' => '',
 			'tooltip' => '',
 			'callback' => $this->get_email_options()
+		);
+		$metabox_fields['enrolled-users'] = array(
+			'label' => "Enrolled Users",
+			'id' => 'enrolled_users',
+			'description' => '',
+			'tooltip' => '',
+			'layout' => 'grid',
+			'callback' => $this->get_enrolled_users_options()
 		);
 		$this->flms_settings_output($metabox_fields);
 	}
@@ -790,6 +798,37 @@ class FLMS_Course_Manager {
 				$return .= '</div>';
 					
 			}
+		$return .= '</div>';
+		return $return;
+	}
+
+	public function get_enrolled_users_options() {
+		global $post, $wpdb;
+		$active_version = get_post_meta($post->ID,'flms_course_active_version',true);
+		$versions = get_post_meta($post->ID,'flms_version_content',true);
+
+		/**
+		 * TODO: Convert this to an ajax query so we can paginate results for large course enrollments
+		 **/
+		
+		$table = FLMS_ACTIVITY_TABLE;
+		$results = $wpdb->get_results("SELECT * FROM $table WHERE course_id = ".$post->ID." AND course_version = ".$active_version." ORDER BY $table.`id` DESC" );
+		$return = '<div class="enrolled-users setting-area-fields">';
+			if(!empty($results)) {
+				$return .= '<div class="settings-field  col-3">';
+				$return .= '<label class="heading">Name</label><label class="heading">Email</label><label class="heading align-end">Edit</label>';
+				foreach ($results as $result){    
+					$user = get_user_by('id', $result->customer_id);
+					if($user == false) {
+						continue;
+					}
+					$return .= '<div>'.$user->first_name.' '.$user->last_name.'</div><div><a href="mailto:'.$user->user_email.'" target="_blank" title="Email '.$user->user_email.'">'.$user->user_email.'</a></div><div class="align-end"><a href="'.trailingslashit(admin_url()).'/user-edit.php?user_id='.$user->ID.'" target="_blank" title="Edit user">Edit</a></div>';
+				}
+				$return .= '</div>';
+			} else {
+				$return .= '<p>No enrolled users to display.</p>';
+			}
+			$return .= '<p class="description" style="margin-top: 20px;">Note: To enroll or unenroll a customer, visit their profile page.</p>';
 		$return .= '</div>';
 		return $return;
 	}

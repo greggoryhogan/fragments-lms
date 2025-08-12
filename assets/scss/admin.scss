@@ -474,6 +474,9 @@ input {
                     &.align-start {
                         align-items: flex-start!important;
                     }
+                    .align-end {
+                        justify-self: flex-end;
+                    }
                     .h100 {
                         height: 100%;
                     }
