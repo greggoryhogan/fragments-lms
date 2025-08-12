@@ -803,6 +803,11 @@ class FLMS_Course_Manager {
 	}
 
 	public function get_enrolled_users_options() {
+
+		/**
+		 * TODO: Add additional fields such as course status, enrollment /completed date
+		 */
+
 		global $post, $wpdb;
 		$active_version = get_post_meta($post->ID,'flms_course_active_version',true);
 		$versions = get_post_meta($post->ID,'flms_version_content',true);
@@ -810,7 +815,7 @@ class FLMS_Course_Manager {
 		/**
 		 * TODO: Convert this to an ajax query so we can paginate results for large course enrollments
 		 **/
-		
+
 		$table = FLMS_ACTIVITY_TABLE;
 		$results = $wpdb->get_results("SELECT * FROM $table WHERE course_id = ".$post->ID." AND course_version = ".$active_version." ORDER BY $table.`id` DESC" );
 		$return = '<div class="enrolled-users setting-area-fields">';
