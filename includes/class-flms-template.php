@@ -336,7 +336,7 @@ class FLMS_Template {
 							if (array_key_exists($last_item_in_previous_lesson, $course_steps[$prev_key])) {
 								$prev = $course_steps[$prev_key][$last_item_in_previous_lesson];
 								if(!flms_is_step_complete($steps_completed, $prev)) {
-									wp_safe_redirect(get_permalink($prev).'?access=linear');
+									wp_safe_redirect(get_permalink($prev).'?access=linear&type=lesson&prev='.$prev_key.'&index='.$last_item_in_previous_lesson);
 								}
 							} else {
 								if(!flms_is_step_complete($steps_completed, $prev_key)) {
@@ -356,12 +356,12 @@ class FLMS_Template {
 							//previous step in lesson
 							$prev = $course_steps[$lesson_id][$index-1];
 							if(!flms_is_step_complete($steps_completed, $prev)) {
-								wp_safe_redirect(get_permalink($prev).'?access=linear');
+								wp_safe_redirect(get_permalink($prev).'?access=linear&type=topic');
 							}
 						} else {
 							if(!flms_is_step_complete($steps_completed, $lesson_id) && $index > 0) {
 								//echo $index;
-								wp_safe_redirect(get_permalink($lesson_id).'?access=linear');
+								wp_safe_redirect(get_permalink($lesson_id).'?access=linear&type=topic&step=incomplete');
 							}
 						}
 					}
@@ -376,12 +376,12 @@ class FLMS_Template {
 								if (array_key_exists($last_item_in_previous_lesson, $course_steps[$prev_key])) {
 									$prev = $course_steps[$prev_key][$last_item_in_previous_lesson];
 									if(!flms_is_step_complete($steps_completed, $prev)) {
-										wp_safe_redirect(get_permalink($prev).'?access=linear');
+										wp_safe_redirect(get_permalink($prev).'?access=linear&type=exam&index='.$last_item_in_previous_lesson);
 									}
 								} else if (array_key_exists($keys[$prev_index], $course_steps)) {
 									$prev = $keys[$prev_index];
 									if(!flms_is_step_complete($steps_completed, $prev)) {
-										wp_safe_redirect(get_permalink($prev).'?access=linear');
+										wp_safe_redirect(get_permalink($prev).'?access=linear&type=exam&step=incomplete');
 									}
 								}
 							}
@@ -396,11 +396,11 @@ class FLMS_Template {
 								//previous step in lesson
 								$prev = $course_steps[$parent_id][$index-1];
 								if(!flms_is_step_complete($steps_completed, $prev)) {
-									wp_safe_redirect(get_permalink($prev).'?access=linear');
+									wp_safe_redirect(get_permalink($prev).'?access=linear&step=parent');
 								}
 							} else {
 								if(!flms_is_step_complete($steps_completed, $parent_id)) {
-									wp_safe_redirect(get_permalink($parent_id).'?access=linear');
+									wp_safe_redirect(get_permalink($parent_id).'?access=linear&step=incompleteparent');
 								}
 							}
 						}
@@ -457,14 +457,13 @@ class FLMS_Template {
 		global $post;
 		$post_types = flms_get_plugin_post_type_internal_permalinks();
 		$directory = trailingslashit(FLMS_ABSPATH) .'template/';
-
 		if ( in_array($post->post_type, $post_types)) {
 			//global $flms_active_version, $flms_course_version_content, $flms_course_id;
 			//$flms_course_id = flms_get_course_id($post);
 			//$flms_course_version_content = get_post_meta($flms_course_id,'flms_version_content',true);	
 
 			$tpl_file = str_replace('flms-','',$post->post_type);
-			if(!locate_template( array( "flms/$tpl_file/single-$tpl_file.php" ) ) !== $template) {
+			if(!locate_template( array( "flms/$tpl_file/single-$tpl_file.php" ), true ) !== $template) {
 				return $directory . "$tpl_file/single-$tpl_file.php";
 			}
 		}

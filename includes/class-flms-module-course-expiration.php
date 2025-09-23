@@ -227,8 +227,8 @@ class FLMS_Module_Course_expiration {
         $flms_course_version_content = get_post_meta($course_id,'flms_version_content',true);	
         if(isset($flms_course_version_content[$course_version]['course_expiration'])) {
             if($flms_course_version_content[$course_version]['course_expiration'] != '') {
-                if(isset($content['course_expiration']['version_expires'])) {
-				    if($content['course_expiration']['version_expires'] != '') {
+                if(isset($flms_course_version_content[$course_version]['course_expiration']['version_expires'])) {
+				    if($flms_course_version_content[$course_version]['course_expiration']['version_expires'] != '') {
                         return true;
                     }
                 }
@@ -358,6 +358,8 @@ class FLMS_Module_Course_expiration {
                 foreach($course_versioned_content as $active_version => $content) {
                     if($this->is_course_expired($course_id, $active_version)) {
                         $this->expire_course($course_id, $active_version);
+                    } else {
+                        //TODO: See if we should send a reminder
                     }
                 }
             }

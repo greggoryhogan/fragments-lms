@@ -18,7 +18,7 @@
  defined( 'ABSPATH' ) || exit;
 
  get_header( 'flms' );
-
+ 
  do_action('flms_before_main_content'); ?>
 
  <header class="flms-header">

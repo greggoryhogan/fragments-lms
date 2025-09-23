@@ -952,9 +952,13 @@ class FLMS_Cron {
                             case 'essay':
                                 break;
                         }
+
                     } else if(($field_indexes['Answer'] != -2 && $field_indexes['Options'] == -2) || ($field_indexes['Answer'] == -2 && $field_indexes['Options'] != -2)) {
                         $errors[] = "Skipped importing question '.$question_id.' answers and options, both fields required for import.";
                     }
+
+                    do_action('flms_import_question', $question_id, $data, $field_indexes, $import_action);
+                    
                 }
             }
             fclose($handle);

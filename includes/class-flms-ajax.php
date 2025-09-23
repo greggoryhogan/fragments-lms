@@ -1793,6 +1793,7 @@ class FLMS_Ajax {
 											$fields[] = "";
 										}
 									}
+									$fields = apply_filters('flms_export_content_row', $fields, $id, 'courses');
 									fputcsv($open,$fields,$separator);
 								}
 							}
@@ -1884,6 +1885,7 @@ class FLMS_Ajax {
 										}
 									}
 								}
+								$fields = apply_filters('flms_export_content_row', $fields, $id, 'lessons');
 								fputcsv($open,$fields,$separator);
 							}
 							
@@ -1972,6 +1974,7 @@ class FLMS_Ajax {
 									}
 								}
 								$fields[] = get_post_status();
+								$fields = apply_filters('flms_export_content_row', $fields, $id, 'topics');
 								fputcsv($open,$fields,$separator);
 							}
 							
@@ -2140,6 +2143,7 @@ class FLMS_Ajax {
 											}
 										}
 									}
+									$fields = apply_filters('flms_export_content_row', $fields, $id, 'exams');
 									fputcsv($open,$fields,$separator);
 								}
 							}
@@ -2235,6 +2239,7 @@ class FLMS_Ajax {
 							}
 							//$fields = "$id\t$title\t$categories\t$question_type\t$content\t$status\t$options\t$answers\n";
 							$fields = array($id,$title,$categories,$question_type,$content,$status,$order,$options,$answers);
+							$fields = apply_filters('flms_export_content_row', $fields, $id, 'questions');
 							fputcsv($open,$fields,$separator);
 
 							
