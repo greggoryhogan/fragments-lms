@@ -2666,10 +2666,10 @@ class FLMS_Module_Woocommerce {
                                                 // Add Fee item to the order
                                                 $item_fee = new WC_Order_Item_Fee();
                                                 $item_fee->set_name( $fee_name ); // Generic fee name
-                                                $item_fee->set_amount( absint($reporting_fee) ); // Fee amount
+                                                $item_fee->set_amount( floatval($reporting_fee) ); // Fee amount
                                                 $item_fee->set_tax_class( '' ); // default for ''
                                                 $item_fee->set_tax_status( 'taxable' ); // or 'none'
-                                                $item_fee->set_total( absint($reporting_fee) ); // Fee amount
+                                                $item_fee->set_total( floatval($reporting_fee) ); // Fee amount
                                                 $order->add_item( $item_fee );  
                                                 
                                             }
