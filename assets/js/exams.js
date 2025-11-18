@@ -90,7 +90,7 @@
         isSaving = true;
         $.ajax({
             url: flms_exams.ajax_url,
-            type: 'get',
+            type: 'POST',
             data: {
                 action: 'save_exam',
                 exam_id : flms_exams.exam_id,
@@ -123,7 +123,7 @@
         isSaving = true;
         $.ajax({
             url: flms_exams.ajax_url,
-            type: 'get',
+            type: 'POST',
             data: {
                 action: 'grade_exam',
                 exam_id : flms_exams.exam_id,
@@ -163,7 +163,7 @@
         isSaving = true;
         $.ajax({
             url: flms_exams.ajax_url,
-            type: 'get',
+            type: 'POST',
             data: {
                 action: 'grade_exam',
                 exam_id : flms_exams.exam_id,
@@ -198,7 +198,7 @@
         //console.log(review);
         $.ajax({
             url: flms_exams.ajax_url,
-            type: 'get',
+            type: 'POST',
             data: {
                 action: 'paginate_exam',
                 exam_id : flms_exams.exam_id,

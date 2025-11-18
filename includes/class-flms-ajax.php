@@ -751,14 +751,14 @@ class FLMS_Ajax {
 	}
 
 	public function paginate_exam_callback() {
-		$user_id = absint($_GET['user_id']);
-		$exam_id = absint($_GET['exam_id']);
-		$review = absint($_GET['review']);
-		$page = absint($_GET['page']);
-		$reset_timer = absint($_GET['reset_timer']);
-		$question_counter = absint($_GET['question_counter']);
-		$version_index = absint($_GET['version_index']);
-		$reset_exam_progress = absint($_GET['reset_exam_progress']);
+		$user_id = absint($_POST['user_id']);
+		$exam_id = absint($_POST['exam_id']);
+		$review = absint($_POST['review']);
+		$page = absint($_POST['page']);
+		$reset_timer = absint($_POST['reset_timer']);
+		$question_counter = absint($_POST['question_counter']);
+		$version_index = absint($_POST['version_index']);
+		$reset_exam_progress = absint($_POST['reset_exam_progress']);
 		$versions = get_post_meta($exam_id,'flms_version_content',true);
 
 		$exam_settings = get_post_meta($exam_id, "flms_exam_settings_$version_index", true);
@@ -767,8 +767,8 @@ class FLMS_Ajax {
 		$start = $limit * ($page - 1);
 		$nextpage = $page + 1;
 		$questions = new FLMS_Questions();
-		if(isset($_GET['answers'])) {
-			$answers = $_GET['answers'];
+		if(isset($_POST['answers'])) {
+			$answers = $_POST['answers'];
 		} else {
 			$answers = array();
 		}
@@ -856,14 +856,14 @@ class FLMS_Ajax {
 	}
 
 	public function save_exam_callback() {
-		$user_id = absint($_GET['user_id']);
-		$exam_id = absint($_GET['exam_id']);
-		if(isset($_GET['answers'])) {
-			$answers = $_GET['answers'];
+		$user_id = absint($_POST['user_id']);
+		$exam_id = absint($_POST['exam_id']);
+		if(isset($_POST['answers'])) {
+			$answers = $_POST['answers'];
 		} else {
 			$answers = array();
 		}
-		$version_index = absint($_GET['version_index']);
+		$version_index = absint($_POST['version_index']);
 		$exam = new FLMS_Exam($exam_id);
 		global $flms_active_version;
 		$flms_active_version = $version_index;
@@ -872,18 +872,18 @@ class FLMS_Ajax {
 	}
 
 	public function grade_exam_callback() {
-		$user_id = absint($_GET['user_id']);
-		$exam_id = absint($_GET['exam_id']);
+		$user_id = absint($_POST['user_id']);
+		$exam_id = absint($_POST['exam_id']);
 		$exam_update = false;
-		if(isset($_GET['exam_update'])) {
-			$exam_update = absint($_GET['exam_update']);
+		if(isset($_POST['exam_update'])) {
+			$exam_update = absint($_POST['exam_update']);
 		}
-		if(isset($_GET['answers'])) {
-			$answers = $_GET['answers'];
+		if(isset($_POST['answers'])) {
+			$answers = $_POST['answers'];
 		} else {
 			$answers = array();
 		}
-		$version_index = absint($_GET['version_index']);
+		$version_index = absint($_POST['version_index']);
 		$exam = new FLMS_Exam($exam_id);
 		global $flms_active_version;
 		$flms_active_version = $version_index;
