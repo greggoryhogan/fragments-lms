@@ -303,7 +303,12 @@ class FLMS_Exam {
 							} else {
 								$exam_label = apply_filters('flms_start_exam_label', $exam_label, $flms_exam_id, $flms_course_id, $flms_active_version );
 							}
-							$content .= '<button id="start_exam" class="button button-primary">'.$exam_label.'</button>';
+							$show_start_exam = apply_filters('flms_show_start_exam_button', true, $flms_exam_id, $flms_course_id, $flms_active_version, $current_user );
+							if($show_start_exam) {
+								$content .= '<button id="start_exam" class="button button-primary">'.$exam_label.'</button>';
+							} else {
+								$content .= apply_filters('flms_start_button_disabled_text', '', $flms_exam_id, $flms_course_id, $flms_active_version, $current_user);
+							}
 							$content .= $exam_link;
 						}
 					} 
