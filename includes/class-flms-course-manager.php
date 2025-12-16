@@ -29,7 +29,7 @@ class FLMS_Course_Manager {
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 		add_action( 'admin_notices', array( $this, 'trigger_migrations' ) );
 		add_action('template_redirect', array($this, 'redirect_empty_version_content'));
-		add_action('flms_update_course_metadata_cron', array($this, 'flms_update_course_metadata_cron_func'));
+		add_action('flms_update_course_metadata_cron_v2', array($this, 'flms_update_course_metadata_cron_func'));
 	}
 
 	/**
