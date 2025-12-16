@@ -195,6 +195,7 @@ class FLMS_Shortcodes {
 		$search_course_numbers = apply_filters('flms_allow_course_numbers_in_search', true);
 		
 		$status_string = "`meta_key`='course_status' AND `meta_value`='publish'";
+		
 		$table = FLMS_COURSE_QUERY_TABLE;
 		
 		if(!empty($_GET)) {
@@ -278,9 +279,11 @@ class FLMS_Shortcodes {
 			if(isset($_GET['course-term'])) {
 				$course_term = $_GET['course-term'];
 				if($course_term != '') {
-					$default = "course_id IN (SELECT course_id FROM $table WHERE `meta_key`='course_name' AND `meta_value` REGEXP '$course_term')";
+					$search_term = str_replace('#','',$course_term);
+					$term_string = "(`meta_key` IN ('post_content','course_preview','course_toc') AND `meta_value` LIKE '%$search_term%')";
+					$default = "course_id IN (SELECT course_id FROM $table WHERE (`meta_key`='course_name' AND `meta_value` REGEXP '$course_term') OR $term_string)";
+					//$search_course_numbers = false;
 					if($search_course_numbers) {
-						$search_term = str_replace('#','',$course_term);
 						if(flms_is_module_active('course_numbers')) {
 							global $wpdb;
 							$course_credits = new FLMS_Module_Course_Credits();
@@ -298,11 +301,13 @@ class FLMS_Shortcodes {
 								$credit_strings[] = $string;
 							}
 							$credit_query_string = '('.implode(') OR (', $credit_strings).')';
-							$default = "course_id IN (SELECT course_id FROM $table WHERE (`meta_key`='course_name' AND `meta_value` REGEXP '$course_term') OR $credit_query_string)";
+							$default = "course_id IN (SELECT course_id FROM $table WHERE (`meta_key`='course_name' AND `meta_value` REGEXP '$course_term') OR $term_string OR $credit_query_string)";
 						}
 
 					}
 					$query_strings[] = $default;
+
+					
 				}
 			} 
 			
@@ -311,20 +316,36 @@ class FLMS_Shortcodes {
 			$course_ids = array();
 			foreach($query_strings as $query_string) {
 				$sql_query = "SELECT DISTINCT course_id FROM $table WHERE $query_string";	
+				//echo $sql_query.'<br><br>';
 				//$sql = $wpdb->prepare( $sql_query );
 				//$results = $wpdb->get_results( $sql );
 				$results = $wpdb->get_col( $sql_query ); 
 				if(!empty($results)) {
+					//print_r($results);
 					$course_ids[] = $results;
 				}
 			}
-
+			//echo '<pre>'.print_r($course_ids,true).'</pre>';
 			if(!empty($course_ids)) {
 				$course_ids = call_user_func_array('array_intersect', $course_ids);
 			}
 			if(empty($course_ids)) {
 				$course_ids = array(0);
 			}
+
+			//search courses for post_content and course_preview
+			/*if(isset($_GET['course-term'])) {
+				$search_term = stripslashes(sanitize_text_field($_GET['course-term']));
+				if($search_term != '') {
+					$content_string = "`meta_key` IN ('post_content','course_preview') AND `meta_value` LIKE '%$search_term%'";
+					$sql_query = "SELECT DISTINCT course_id FROM $table WHERE $content_string";	
+					$results = $wpdb->get_col( $sql_query ); 
+					if(!empty($results)) {
+						$course_ids = array_merge($course_ids, $results);
+					}
+				}
+			}*/
+
 			$args['post__in'] = $course_ids;
 
 			/*$sql_query = "SELECT DISTINCT course_id FROM $table WHERE $query_string";

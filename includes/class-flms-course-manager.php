@@ -27,7 +27,9 @@ class FLMS_Course_Manager {
 		add_action( 'before_delete_post', array($this,'trash_clean_course_postdata'),10,2);
 		add_action( 'trash_flms-courses', array($this,'trash_clean_course_query_metadata'),10,1);
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+		add_action( 'admin_notices', array( $this, 'trigger_migrations' ) );
 		add_action('template_redirect', array($this, 'redirect_empty_version_content'));
+		add_action('flms_update_course_metadata_cron', array($this, 'flms_update_course_metadata_cron_func'));
 	}
 
 	/**
@@ -76,6 +78,90 @@ class FLMS_Course_Manager {
 		   <p><?php esc_html_e( 'This lesson belongs to one or more versions and could not be removed. Please remove it from all versions of your course before disassociating the course.', 'flms' ); ?></p>
 		</div>
 		<?php
+	}
+
+	public function trigger_migrations() {
+		if ( ! current_user_can('manage_options') ) return;
+		//if ( empty($_GET['run_flms_migration']) ) return;
+
+		// schedule immediate single run
+		wp_schedule_single_event(time() + 5, 'flms_update_course_metadata_cron');
+	}
+
+	public function flms_update_course_metadata_cron_func() {
+		$lock_key   = 'flms_metadata_migration_lock';
+		$cursor_key = 'flms_metadata_migration_cursor';
+		$done_key   = 'flms_metadata_migration_done';
+
+		if ( get_option($done_key) ) return;
+		if ( get_transient($lock_key) ) return;
+		set_transient($lock_key, 1, 10 * MINUTE_IN_SECONDS);
+
+		$batch_size = 50;
+		$last_id    = (int) get_option($cursor_key, 0);
+
+		add_filter('posts_where', $where_filter = function ($where) use ($last_id) {
+			global $wpdb;
+			return $where . $wpdb->prepare(" AND {$wpdb->posts}.ID > %d ", $last_id);
+		});
+
+		$ids = get_posts([
+			'post_type'              => 'flms-courses',
+			'post_status'            => 'any',
+			'numberposts'            => $batch_size,
+			'orderby'                => 'ID',
+			'order'                  => 'ASC',
+			'fields'                 => 'ids',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'cache_results'          => false,
+			'suppress_filters'       => false, // IMPORTANT so our where filter runs
+		]);
+
+		remove_filter('posts_where', $where_filter);
+
+		if ( empty($ids) ) {
+			update_option($done_key, 1, false);
+			delete_transient($lock_key);
+			$to = '';
+			if($user_id > 0) {
+				$user = get_user_by( 'id', $user_id );
+				if($user !== false) {
+					$to = $user->user_email;
+				}
+			} else {
+				$to = get_option('admin_email');
+			}
+			if($to != '') {
+				$message = "Your course metadata update is complete. This update was triggered automatically to improve frontend course search performance.";
+				$headers = array('Content-Type: text/html; charset=UTF-8');
+				wp_mail($to, FLMS_PLUGIN_NAME .' course metadata update complete!',$message, $headers);
+			}
+			return;
+		}
+
+		$course_manager = new FLMS_Course_Manager();
+
+		foreach ($ids as $post_id) {
+			// Optional safety: skip if already processed
+			if ( get_post_meta($post_id, '_flms_metadata_updated', true) ) {
+				$last_id = $post_id;
+				continue;
+			}
+
+			$course_manager->update_course_query_metadata($post_id);
+
+			$last_id = $post_id;
+		}
+
+		// Persist cursor so next run resumes correctly
+		update_option($cursor_key, $last_id, false);
+
+		// Reschedule next chunk immediately
+		wp_schedule_single_event(time() + 10, 'flms_update_course_metadata_cron');
+
+		delete_transient($lock_key);
 	}
 
 	public function flms_lessons_exam_options_metabox() {
@@ -604,14 +690,6 @@ class FLMS_Course_Manager {
 				'tooltip' => '',
 				'callback' => $this->get_course_preview()
 			),
-			'version-options' => array(
-				'label' => "$course_name Settings",
-				'id' => 'version-settings',
-				'description' => '',
-				'tooltip' => '',
-				
-				'callback' => $this->get_version_options('standard')
-			),
 			/*'course-settings' => array(
 				'label' => "$course_name Options",
 				'id' => 'course-options',
@@ -620,6 +698,25 @@ class FLMS_Course_Manager {
 				'callback' => $this->get_course_settings()
 			),*/
 		);
+		$toc_active = apply_filters('flms_uses_toc', false);
+		if($toc_active) {
+			$metabox_fields['course-toc'] = array(
+				'label' => "$course_name Table of Contents",
+				'id' => 'course-toc',
+				'description' => '',
+				'tooltip' => '',
+				'callback' => $this->get_course_toc()
+			);	
+		}
+		$metabox_fields['version-options'] = array(
+			'label' => "$course_name Settings",
+			'id' => 'version-settings',
+			'description' => '',
+			'tooltip' => '',
+			
+			'callback' => $this->get_version_options('standard')
+		);
+
 		if(flms_is_module_active('course_credits')) {
 			$course_materials = new FLMS_Module_Course_Materials();
 			$metabox_fields['course-materials'] = array(
@@ -713,6 +810,21 @@ class FLMS_Course_Manager {
 				$preview_content = $flms_course_version_content[$flms_active_version]['course_preview'];
 			}
 			wp_editor($preview_content, "$flms_course_id-preview-content");
+			$return .= ob_get_clean();
+		$return .= '</div>';
+		return $return;
+	}
+
+	public function get_course_toc() {
+		global $flms_course_id, $flms_active_version, $flms_course_version_content;
+		$return = '<div class="course-toc">';
+			$return .= '<p class="description" style="margin-bottom: 20px;">Text content to display a table of contents in the course.</p>';
+			ob_start();
+			$toc = '';
+			if(isset($flms_course_version_content[$flms_active_version]['course_toc'])) {
+				$toc = $flms_course_version_content[$flms_active_version]['course_toc'];
+			}
+			wp_editor($toc, "$flms_course_id-toc-content");
 			$return .= ob_get_clean();
 		$return .= '</div>';
 		return $return;
@@ -1859,6 +1971,12 @@ class FLMS_Course_Manager {
 					$this->update_version_preview($post_id, $active_version, $version_preview);
 				}
 
+				$version_toc = '';
+				if(isset($_POST["$post_id-toc-content"])) {
+					$version_toc = $_POST["$post_id-toc-content"];	
+					$this->update_version_toc($post_id, $active_version, $version_toc);
+				}
+
 				$this->update_version_attributes($post_id, $active_version, $_POST);
 
 
@@ -2098,6 +2216,33 @@ class FLMS_Course_Manager {
 				);
 				
 			}
+			if(isset($latest_data['course_preview'])) {
+				
+				$values[] = array(
+					$course_id,
+					'course_preview',
+					strip_tags($latest_data['course_preview']),
+				);
+				
+			}
+			if(isset($latest_data['course_toc'])) {
+				
+				$values[] = array(
+					$course_id,
+					'course_toc',
+					strip_tags($latest_data['course_toc']),
+				);
+				
+			}
+			if(isset($latest_data['post_content'])) {
+				
+				$values[] = array(
+					$course_id,
+					'post_content',
+					strip_tags($latest_data['post_content']),
+				);
+				
+			}
 
 		}
 		
@@ -2121,15 +2266,44 @@ class FLMS_Course_Manager {
 			}
 		}
 
+		//flms_debug($values);
 		//Add product type
 
+		/*
 		$insert_array = array();
 		foreach($values as $value) {
 			$insert_array[] = "( '". implode("','", $value) ." ')";
 		}
 		$insert_string = implode(',',$insert_array);
 		
-		$wpdb->query("INSERT INTO $table ( " . implode(',', $meta_keys) . " ) VALUES $insert_string");
+		$wpdb->query("INSERT INTO $table ( " . implode(',', $meta_keys) . " ) VALUES $insert_string");*/
+		if ( ! empty($values) ) {
+
+			// Optional: wrap in a transaction if your DB supports it (InnoDB)
+			// $wpdb->query('START TRANSACTION');
+
+			$placeholders = array();
+			$flat_values  = array();
+
+			foreach ( $values as $row ) {
+				// row = [$course_id, $meta_key, $meta_value]
+				$placeholders[] = "(%d, %s, %s)";
+				$flat_values[]  = (int) $row[0];
+				$flat_values[]  = (string) $row[1];
+				$flat_values[]  = (string) $row[2];
+			}
+
+			// Backtick identifiers. (Assumes your constants/keys are trusted.)
+			$table_sql   = '`' . esc_sql($table) . '`';
+			$columns_sql = '`' . implode('`,`', array_map('esc_sql', $meta_keys)) . '`';
+
+			$sql = "INSERT INTO {$table_sql} ({$columns_sql}) VALUES " . implode(',', $placeholders);
+
+			$wpdb->query( $wpdb->prepare($sql, $flat_values) );
+
+			// $wpdb->query('COMMIT');
+		}
+
 
 		//clear transients
 		delete_transient('flms_woocommerce_published_products');
@@ -2383,6 +2557,15 @@ class FLMS_Course_Manager {
 			);
 			$updated = wp_update_post( $args );
 		}
+	}
+
+	public function update_version_toc($post_id,$active_version, $content) {
+		$course_versioned_content = get_post_meta($post_id,'flms_version_content',true);
+		if(!is_array($course_versioned_content)) {
+			$course_versioned_content = array();
+		}
+		$course_versioned_content["{$active_version}"]['course_toc'] = wp_kses_post($content);
+		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
 	}
 
 	/**

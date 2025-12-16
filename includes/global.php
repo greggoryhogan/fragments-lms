@@ -2389,12 +2389,17 @@ function flms_get_import_export_columns($type) {
 				'Version Status',
 				'Post Content',
 				'Course Preview',
+				'Table of Contents',
 				'Course Access',
 				'Course Progression',
 				'Course Certificates',
 				'Lessons',
 				'Exams'
 			);
+			$toc_active = apply_filters('flms_uses_toc', false);
+			if(!$toc_active) {
+				unset($fields_to_process['Table of Contents']);
+			}
 			if(flms_is_module_active('course_numbers')) {
 				$fields[] = 'Course Number';
 			}

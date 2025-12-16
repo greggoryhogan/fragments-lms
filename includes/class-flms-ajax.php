@@ -1641,11 +1641,16 @@ class FLMS_Ajax {
 										'version_status',
 										'post_content',
 										'course_preview',
+										'course_toc',
 										'course_settings',
 										'course_certificates',
 										'course_lessons',
 										'post_exams',
 									);
+									$toc_active = apply_filters('flms_uses_toc', false);
+									if(!$toc_active) {
+										unset($fields_to_process['course_toc']);
+									}
 									/* 'course_lessons',
 										'lesson_topics',
 										'post_exams', */

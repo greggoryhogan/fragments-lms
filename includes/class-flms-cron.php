@@ -28,6 +28,7 @@ class FLMS_Cron {
         $rows = 0;
         if (($handle = fopen($file, 'r')) !== false) {
             $deliminator = flms_detect_csv_elimiter($file);
+            $toc_active = apply_filters('flms_uses_toc', false);
             while (($data = fgetcsv($handle, 0, $deliminator)) !== false) {
                 $rows++;
         
@@ -126,11 +127,23 @@ class FLMS_Cron {
                             }
                         }
 
+                        //course preview
                         if($field_indexes['Course Preview'] != -2) {
                             $versioned_content["$version"]['course_preview'] = $data[$field_indexes['Course Preview']];
                         } else {
                             if(!isset($versioned_content["$version"]['course_preview'])) {
                                 $versioned_content["$version"]['course_preview'] = '';
+                            }
+                        }
+
+                        //Table of Contents
+                        if($toc_active) {
+                            if($field_indexes['Table of Contents'] != -2) {
+                                $versioned_content["$version"]['course_toc'] = $data[$field_indexes['Table of Contents']];
+                            } else {
+                                if(!isset($versioned_content["$version"]['course_toc'])) {
+                                    $versioned_content["$version"]['course_toc'] = '';
+                                }
                             }
                         }
 
