@@ -85,13 +85,13 @@ class FLMS_Course_Manager {
 		//if ( empty($_GET['run_flms_migration']) ) return;
 
 		// schedule immediate single run
-		wp_schedule_single_event(time() + 5, 'flms_update_course_metadata_cron');
+		wp_schedule_single_event(time() + 5, 'flms_update_course_metadata_cron_v2');
 	}
 
 	public function flms_update_course_metadata_cron_func() {
-		$lock_key   = 'flms_metadata_migration_lock';
-		$cursor_key = 'flms_metadata_migration_cursor';
-		$done_key   = 'flms_metadata_migration_done';
+		$lock_key   = 'flms_metadata_migration_lock_v2';
+		$cursor_key = 'flms_metadata_migration_cursor_v2';
+		$done_key   = 'flms_metadata_migration_done_v2';
 
 		if ( get_option($done_key) ) return;
 		if ( get_transient($lock_key) ) return;
@@ -145,7 +145,7 @@ class FLMS_Course_Manager {
 
 		foreach ($ids as $post_id) {
 			// Optional safety: skip if already processed
-			if ( get_post_meta($post_id, '_flms_metadata_updated', true) ) {
+			if ( get_post_meta($post_id, '_flms_metadata_updated_v2', true) ) {
 				$last_id = $post_id;
 				continue;
 			}
@@ -159,7 +159,7 @@ class FLMS_Course_Manager {
 		update_option($cursor_key, $last_id, false);
 
 		// Reschedule next chunk immediately
-		wp_schedule_single_event(time() + 10, 'flms_update_course_metadata_cron');
+		wp_schedule_single_event(time() + 10, 'flms_update_course_metadata_cron_v2');
 
 		delete_transient($lock_key);
 	}
