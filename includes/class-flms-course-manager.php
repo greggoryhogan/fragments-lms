@@ -698,10 +698,21 @@ class FLMS_Course_Manager {
 				'callback' => $this->get_course_settings()
 			),*/
 		);
+		$lo_active = apply_filters('flms_uses_learning_objectives', false);
+		if($lo_active) {
+			$metabox_fields['course-lo'] = array(
+				'label' => "Learning Objectives",
+				'id' => 'course-learning-objectives',
+				'description' => '',
+				'tooltip' => '',
+				'callback' => $this->get_course_learning_objectives()
+			);	
+		}
+
 		$toc_active = apply_filters('flms_uses_toc', false);
 		if($toc_active) {
 			$metabox_fields['course-toc'] = array(
-				'label' => "$course_name Table of Contents",
+				'label' => "Table of Contents",
 				'id' => 'course-toc',
 				'description' => '',
 				'tooltip' => '',
@@ -810,6 +821,21 @@ class FLMS_Course_Manager {
 				$preview_content = $flms_course_version_content[$flms_active_version]['course_preview'];
 			}
 			wp_editor($preview_content, "$flms_course_id-preview-content");
+			$return .= ob_get_clean();
+		$return .= '</div>';
+		return $return;
+	}
+
+	public function get_course_learning_objectives() {
+		global $flms_course_id, $flms_active_version, $flms_course_version_content;
+		$return = '<div class="course-lo">';
+			$return .= '<p class="description" style="margin-bottom: 20px;">Text content to display learning objectives in the course.</p>';
+			ob_start();
+			$toc = '';
+			if(isset($flms_course_version_content[$flms_active_version]['course_learning_objectives'])) {
+				$toc = $flms_course_version_content[$flms_active_version]['course_learning_objectives'];
+			}
+			wp_editor($toc, "$flms_course_id-lo-content");
 			$return .= ob_get_clean();
 		$return .= '</div>';
 		return $return;
@@ -1977,6 +2003,12 @@ class FLMS_Course_Manager {
 					$this->update_version_toc($post_id, $active_version, $version_toc);
 				}
 
+				$version_lo = '';
+				if(isset($_POST["$post_id-lo-content"])) {
+					$version_lo = $_POST["$post_id-lo-content"];	
+					$this->update_version_lo($post_id, $active_version, $version_lo);
+				}
+
 				$this->update_version_attributes($post_id, $active_version, $_POST);
 
 
@@ -2234,6 +2266,17 @@ class FLMS_Course_Manager {
 				);
 				
 			}
+
+			if(isset($latest_data['course_learning_objectives'])) {
+				
+				$values[] = array(
+					$course_id,
+					'course_lo',
+					strip_tags($latest_data['course_learning_objectives']),
+				);
+				
+			}
+
 			if(isset($latest_data['post_content'])) {
 				
 				$values[] = array(
@@ -2565,6 +2608,15 @@ class FLMS_Course_Manager {
 			$course_versioned_content = array();
 		}
 		$course_versioned_content["{$active_version}"]['course_toc'] = wp_kses_post($content);
+		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
+	}
+
+	public function update_version_lo($post_id,$active_version, $content) {
+		$course_versioned_content = get_post_meta($post_id,'flms_version_content',true);
+		if(!is_array($course_versioned_content)) {
+			$course_versioned_content = array();
+		}
+		$course_versioned_content["{$active_version}"]['course_learning_objectives'] = wp_kses_post($content);
 		update_post_meta($post_id,'flms_version_content',$course_versioned_content);
 	}
 

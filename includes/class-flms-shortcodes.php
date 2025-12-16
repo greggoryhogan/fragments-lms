@@ -280,7 +280,7 @@ class FLMS_Shortcodes {
 				$course_term = $_GET['course-term'];
 				if($course_term != '') {
 					$search_term = str_replace('#','',$course_term);
-					$term_string = "(`meta_key` IN ('post_content','course_preview','course_toc') AND `meta_value` LIKE '%$search_term%')";
+					$term_string = "(`meta_key` IN ('post_content','course_preview','course_toc','course_lo') AND `meta_value` LIKE '%$search_term%')";
 					$default = "course_id IN (SELECT course_id FROM $table WHERE (`meta_key`='course_name' AND `meta_value` REGEXP '$course_term') OR $term_string)";
 					//$search_course_numbers = false;
 					if($search_course_numbers) {

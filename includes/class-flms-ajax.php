@@ -1641,12 +1641,17 @@ class FLMS_Ajax {
 										'version_status',
 										'post_content',
 										'course_preview',
+										'course_learning_objectives',
 										'course_toc',
 										'course_settings',
 										'course_certificates',
 										'course_lessons',
 										'post_exams',
 									);
+									$lo_active = apply_filters('flms_uses_learning_objectives', false);
+									if(!$lo_active) {
+										unset($fields_to_process['course_learning_objectives']);
+									}
 									$toc_active = apply_filters('flms_uses_toc', false);
 									if(!$toc_active) {
 										unset($fields_to_process['course_toc']);

@@ -29,6 +29,7 @@ class FLMS_Cron {
         if (($handle = fopen($file, 'r')) !== false) {
             $deliminator = flms_detect_csv_elimiter($file);
             $toc_active = apply_filters('flms_uses_toc', false);
+            $lo_active = apply_filters('flms_uses_learning_objectives', false);
             while (($data = fgetcsv($handle, 0, $deliminator)) !== false) {
                 $rows++;
         
@@ -133,6 +134,28 @@ class FLMS_Cron {
                         } else {
                             if(!isset($versioned_content["$version"]['course_preview'])) {
                                 $versioned_content["$version"]['course_preview'] = '';
+                            }
+                        }
+
+                        //Learning Objectives
+                        if($toc_active) {
+                            if($field_indexes['Learning Objectives'] != -2) {
+                                $versioned_content["$version"]['course_toc'] = $data[$field_indexes['Learning Objectives']];
+                            } else {
+                                if(!isset($versioned_content["$version"]['course_toc'])) {
+                                    $versioned_content["$version"]['course_toc'] = '';
+                                }
+                            }
+                        }
+
+                        //Learning Objectives
+                        if($lo_active) {
+                            if($field_indexes['Learning Objectives'] != -2) {
+                                $versioned_content["$version"]['course_learning_objectives'] = $data[$field_indexes['Learning Objectives']];
+                            } else {
+                                if(!isset($versioned_content["$version"]['course_learning_objectives'])) {
+                                    $versioned_content["$version"]['course_learning_objectives'] = '';
+                                }
                             }
                         }
 

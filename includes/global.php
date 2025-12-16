@@ -2389,6 +2389,7 @@ function flms_get_import_export_columns($type) {
 				'Version Status',
 				'Post Content',
 				'Course Preview',
+				'Learning Objectives',
 				'Table of Contents',
 				'Course Access',
 				'Course Progression',
@@ -2396,6 +2397,11 @@ function flms_get_import_export_columns($type) {
 				'Lessons',
 				'Exams'
 			);
+			$lo_active = apply_filters('flms_uses_learning_objectives', false);
+			if(!$lo_active) {
+				unset($fields_to_process['Learning Objectives']);
+			}
+
 			$toc_active = apply_filters('flms_uses_toc', false);
 			if(!$toc_active) {
 				unset($fields_to_process['Table of Contents']);
