@@ -73,6 +73,9 @@ final class FLMS {
 		if(flms_is_module_active('course_taxonomies')) {
 			include_once FLMS_ABSPATH . 'includes/class-flms-module-course-taxonomies.php';
 		}
+		if(flms_is_module_active('course_notes')) {
+			include_once FLMS_ABSPATH . 'includes/class-flms-module-course-notes.php';
+		}
 		if(flms_is_module_active('acf')) {
 			include_once FLMS_ABSPATH . 'includes/class-flms-module-acf.php';
 		}

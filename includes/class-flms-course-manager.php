@@ -2051,6 +2051,11 @@ class FLMS_Course_Manager {
 					$course_numbers->update_course_metadata($post_id, $active_version, $_POST);
 				}
 
+				if(flms_is_module_active('course_notes')) {
+					$course_notes = new FLMS_Module_Course_Notes();
+					$course_notes->update_course_notes($post_id, $active_version, $_POST);
+				}
+
 				if(flms_is_module_active('acf')) {
 					$acf = new FLMS_Module_ACF();
 					$acf->save_version_fields($post_id, $active_version, $_POST);

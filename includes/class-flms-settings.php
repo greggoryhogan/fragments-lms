@@ -609,6 +609,18 @@ class FLMS_Settings {
 						'description' => 'Create text fields for your course version'
 					),
 					array(
+						'label' => 'Course Notes',
+						'key' => 'course_notes',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Keep notes on your course and course version in the course editor'
+					),
+					array(
 						'label' => 'Course Numbers',
 						'key' => 'course_numbers',
 						'type' => 'radio',
