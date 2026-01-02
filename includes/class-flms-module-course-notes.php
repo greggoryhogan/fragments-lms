@@ -90,17 +90,22 @@ class FLMS_Module_Course_Notes {
         
 		// Display the form, using the current value.
 		?>
-        <label for="course_notes">Global <?php echo get_the_title(); ?> Notes</label>
+        <label for="course_notes"><?php echo get_the_title(); ?> Notes</label>
         <p class="description">Notes for any version of the course you are editing.</p>
 		<textarea area-label="Course Notes" id="course_notes" name="flms_course_notes" class="full-width-input" rows="6"><?php echo $course_notes; ?></textarea>
 
         <div class="flms-spacer"></div>
 
-        <?php $course_version_notes = '';
+        <?php 
+        $course_version_notes = '';
+        $version_name = $course->get_course_version_name($flms_active_version);
         if(isset($flms_course_version_content[$flms_active_version]['course_notes'])) {
             $course_version_notes = $flms_course_version_content[$flms_active_version]['course_notes'];
+        }
+        if(isset($flms_course_version_content[$flms_active_version]['version_name'])) {
+            $version_name = $flms_course_version_content[$flms_active_version]['version_name'];
         } ?>
-        <label for="course_notes"><?php echo $course->get_course_version_name($flms_active_version); ?> Notes</label>
+        <label for="course_notes"><?php echo $version_name; ?> Notes</label>
         <p class="description">Notes for the specific version of the course you are editing.</p>
         <textarea area-label="Course Version Notes" id="course_version_notes" name="flms_course_version_notes" class="full-width-input" rows="6"><?php echo $course_version_notes; ?></textarea>
 		<?php
