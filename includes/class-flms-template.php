@@ -463,7 +463,10 @@ class FLMS_Template {
 			//$flms_course_version_content = get_post_meta($flms_course_id,'flms_version_content',true);	
 
 			$tpl_file = str_replace('flms-','',$post->post_type);
-			if(!locate_template( array( "flms/$tpl_file/single-$tpl_file.php" ), true ) !== $template) {
+			echo $template;
+			if(locate_template( array( "flms/$tpl_file/single-$tpl_file.php" ), false ) !== '') {
+				return locate_template( array( "flms/$tpl_file/single-$tpl_file.php" ), false );
+			} else {
 				return $directory . "$tpl_file/single-$tpl_file.php";
 			}
 		}
