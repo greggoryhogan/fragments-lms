@@ -28,8 +28,6 @@ class FLMS_Cron {
         $rows = 0;
         if (($handle = fopen($file, 'r')) !== false) {
             $deliminator = flms_detect_csv_elimiter($file);
-            $toc_active = apply_filters('flms_uses_toc', false);
-            $lo_active = apply_filters('flms_uses_learning_objectives', false);
             while (($data = fgetcsv($handle, 0, $deliminator)) !== false) {
                 $rows++;
         
@@ -137,39 +135,6 @@ class FLMS_Cron {
                             }
                         }
 
-                        //Learning Objectives
-                        if($toc_active) {
-                            if($field_indexes['Learning Objectives'] != -2) {
-                                $versioned_content["$version"]['course_toc'] = $data[$field_indexes['Learning Objectives']];
-                            } else {
-                                if(!isset($versioned_content["$version"]['course_toc'])) {
-                                    $versioned_content["$version"]['course_toc'] = '';
-                                }
-                            }
-                        }
-
-                        //Learning Objectives
-                        if($lo_active) {
-                            if($field_indexes['Learning Objectives'] != -2) {
-                                $versioned_content["$version"]['course_learning_objectives'] = $data[$field_indexes['Learning Objectives']];
-                            } else {
-                                if(!isset($versioned_content["$version"]['course_learning_objectives'])) {
-                                    $versioned_content["$version"]['course_learning_objectives'] = '';
-                                }
-                            }
-                        }
-
-                        //Table of Contents
-                        if($toc_active) {
-                            if($field_indexes['Table of Contents'] != -2) {
-                                $versioned_content["$version"]['course_toc'] = $data[$field_indexes['Table of Contents']];
-                            } else {
-                                if(!isset($versioned_content["$version"]['course_toc'])) {
-                                    $versioned_content["$version"]['course_toc'] = '';
-                                }
-                            }
-                        }
-
                         //course access
                         if($field_indexes['Course Access'] != -2) {
                             $versioned_content["$version"]['course_settings']['course_access'] = $data[$field_indexes['Course Access']];
@@ -200,6 +165,22 @@ class FLMS_Cron {
                                     }
                                 }
                                 $versioned_content["$version"]['course_certificates'] = $certificate_ids;
+                            }
+                        }
+
+                        if(flms_is_module_active('course_tabs')) {
+                            $course_tabs = new FLMS_Module_Course_Tabs();
+							$tabs = $course_tabs->get_course_tab_fields(true, true, true);
+                            if(!empty($tabs)) {
+                                flms_debug($tabs);
+                                flms_debug($field_indexes);
+                                foreach($tabs as $k => $v) {
+                                    $tab_name = $v['label'];
+                                    $tab_key = $v['key'];
+                                    if($field_indexes["$tab_name"] != -2) {
+                                        $versioned_content["$version"]['course_tabs']["$tab_key"] = wp_kses_post($data[$field_indexes["$tab_name"]]);
+                                    }
+                                }
                             }
                         }
 

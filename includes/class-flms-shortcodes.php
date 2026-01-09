@@ -278,9 +278,19 @@ class FLMS_Shortcodes {
 			
 			if(isset($_GET['course-term'])) {
 				$course_term = $_GET['course-term'];
+				$search_fields = array('post_content','course_preview');
+				if(flms_is_module_active('course_tabs')) {
+					$course_tabs = new FLMS_Module_Course_Tabs();
+					$tabs = $course_tabs->get_course_tab_fields(true, true, true);
+					if(!empty($tabs)) {
+						foreach($tabs as $k => $v) {
+							$search_fields[] = 'course_tab_'.$v['key'];
+						}
+					}
+				}
 				if($course_term != '') {
 					$search_term = str_replace('#','',$course_term);
-					$term_string = "(`meta_key` IN ('post_content','course_preview','course_toc','course_lo') AND `meta_value` LIKE '%$search_term%')";
+					$term_string = "(`meta_key` IN ('".implode("','",$search_fields)."') AND `meta_value` LIKE '%$search_term%')";
 					$default = "course_id IN (SELECT course_id FROM $table WHERE (`meta_key`='course_name' AND `meta_value` REGEXP '$course_term') OR $term_string)";
 					//$search_course_numbers = false;
 					if($search_course_numbers) {

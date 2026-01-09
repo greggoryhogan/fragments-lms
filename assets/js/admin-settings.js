@@ -131,6 +131,13 @@
         handle: '.handle'
     });
 
+    $( '.setting-area-course_tabs .setting-area-fields' ).sortable({
+        items : '> :not(.create-course-tab-field)',
+        forcePlaceholderSize: true,
+        placeholder: "ui-sortable-placeholder",
+        handle: '.handle'
+    });
+
     $( '.setting-area-course_taxonomies .setting-area-fields' ).sortable({
         items : '> :not(.create-course-taxonomy-field)',
         forcePlaceholderSize: true,
@@ -199,6 +206,33 @@
         }
     });
 
+    //tabs
+    $(document).on('click','#create-course-tab-field', function(e) {
+        e.preventDefault();
+        var name = $('input[name="flms_settings[tmp_create_course_tab][tmp-course-tab-name]"]').val();
+        if(name == '') {
+            alert('Please set the tab name');
+            return;
+        }
+        var status = $('input[name="flms_settings[tmp_create_course_tab][tmp-course-tab-status]"]:checked').val();
+        
+        $.ajax({
+            url: flms_admin_settings.ajax_url,
+            type: 'post',
+            data: {
+                action: 'create_custom_course_tab',
+                name : name,
+                status : status,
+            },
+            success: function(data) {
+                //console.log(data);
+                //$('#course_credits .setting-area-fields.ui-sortable').append(data.new_credit);
+                $(data.new_tab).insertAfter( '.create-course-tabs-field' );
+                $('input[name="flms_settings[tmp_create_course_credits][tmp-course-tab-name]"]').val('');
+            }
+        });
+    });
+
     //taxonomies
     $(document).on('click','#create-course-taxonomy-field', function(e) {
         e.preventDefault();
@@ -237,7 +271,7 @@
         });
     });
 
-    //taxonomies
+    //metadata
     $(document).on('click','#create-course-metadata-field', function(e) {
         e.preventDefault();
         var singular_name = $('input[name="flms_settings[tmp_create_course_metadata][tmp-course-metadata-name]"]').val();

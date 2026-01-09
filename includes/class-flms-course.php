@@ -131,7 +131,11 @@ class FLMS_Course {
 
 	public function get_course_name() {
 		$course_data = get_post($this->course_id);
-		return $course_data->post_name;
+		if($course_data !== null) {
+			return $course_data->post_name;
+		} else {
+			return get_the_title();
+		}
 	}
 
 	public function get_lessons() {

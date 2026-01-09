@@ -2389,22 +2389,20 @@ function flms_get_import_export_columns($type) {
 				'Version Status',
 				'Post Content',
 				'Course Preview',
-				'Learning Objectives',
-				'Table of Contents',
 				'Course Access',
 				'Course Progression',
 				'Course Certificates',
 				'Lessons',
 				'Exams'
 			);
-			$lo_active = apply_filters('flms_uses_learning_objectives', false);
-			if(!$lo_active) {
-				unset($fields_to_process['Learning Objectives']);
-			}
-
-			$toc_active = apply_filters('flms_uses_toc', false);
-			if(!$toc_active) {
-				unset($fields_to_process['Table of Contents']);
+			if(flms_is_module_active('course_tabs')) {
+				$course_tabs = new FLMS_Module_Course_Tabs();
+				$tabs = $course_tabs->get_course_tab_fields(true, true, true);
+				if(!empty($tabs)) {
+					foreach($tabs as $k => $v) {
+						$fields[] = $v['label'];
+					}
+				}
 			}
 			if(flms_is_module_active('course_numbers')) {
 				$fields[] = 'Course Number';

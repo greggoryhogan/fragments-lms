@@ -1551,7 +1551,8 @@ input {
 
   .create-course-credit-field,
   .create-course-taxonomies-field,
-  .create-course-metadata-field {
+  .create-course-metadata-field,
+  .create-course-tabs-field {
     display: block!important;
     .delete-field {
         display: none!important;
@@ -2614,6 +2615,14 @@ input {
     }
     .col-2 {
         width: calc(50% - 4px);
+    }
+}
+#course_tabs-course-content {
+    .settings-field.message {
+        grid-template-columns: 1fr;
+        p {
+            margin: 0;
+        }
     }
 }
 #course-materials-form {

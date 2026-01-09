@@ -43,6 +43,7 @@ class FLMS_Ajax {
 			'update_flms_woocommerce_checkout',
 			'create_custom_credit_type',
 			'create_custom_course_taxonomy',
+			'create_custom_course_tab',
 			'create_custom_course_metadata',
 			'complete_step',
 			'grade_exam',
@@ -1117,6 +1118,39 @@ class FLMS_Ajax {
 		));	
 	}
 
+	public function create_custom_course_tab_callback() {
+		$name = sanitize_text_field($_POST['name']);
+		$slug = sanitize_title( $name );
+		$status = sanitize_text_field($_POST['status']);
+		
+		$course_tabs = new FLMS_Module_Course_Tabs();
+		$form_fields = $course_tabs->get_custom_tab_fields();
+		$update_form_fields = $course_tabs->replace_tmp_fields($form_fields, $name, $status);
+		global $flms_settings;
+		ob_start();
+		$field_group = "course_tabs";
+		foreach($update_form_fields as $form_field) {
+			flms_print_field_input($form_field, $field_group, $slug);
+		}
+		$form = ob_get_clean();
+		
+		$data = '<div class="settings-field '.$slug.' flms-field-group">';
+			$data .= '<div class="setting-field-label"><h3>'.$name.'</h3></div>';
+			$data .= '<div class="flms-field group">';
+				$data .= '<div class="sortable-group">';
+					$data .= '<div>';
+						$data .= $form;
+					$data .= '</div>';
+					$data .= '<div class="handle ui-sortable-handle"></div>';
+				$data .= '</div>';
+			$data .= '</div>';
+		$data .= '</div>';
+		wp_send_json(array(
+			'fields' => print_r($update_form_fields, true),
+			'new_tab' => $data,
+		));	
+	}
+
 	public function create_custom_course_metadata_callback() {
 		$name = sanitize_text_field($_POST['name']);
 		$slug = sanitize_title_with_dashes(sanitize_text_field($_POST['slug']));
@@ -1641,24 +1675,19 @@ class FLMS_Ajax {
 										'version_status',
 										'post_content',
 										'course_preview',
-										'course_learning_objectives',
-										'course_toc',
 										'course_settings',
 										'course_certificates',
 										'course_lessons',
 										'post_exams',
 									);
-									$lo_active = apply_filters('flms_uses_learning_objectives', false);
-									if(!$lo_active) {
-										unset($fields_to_process['course_learning_objectives']);
-									}
-									$toc_active = apply_filters('flms_uses_toc', false);
-									if(!$toc_active) {
-										unset($fields_to_process['course_toc']);
-									}
 									/* 'course_lessons',
 										'lesson_topics',
 										'post_exams', */
+									if(flms_is_module_active('course_tabs')) {
+										$course_tabs = new FLMS_Module_Course_Tabs();
+										$tabs = $course_tabs->get_course_tab_fields(true, true, true);
+										$fields_to_process[] = 'course_tabs';
+									}
 									if(flms_is_module_active('course_numbers')) {
 										$fields_to_process[] = 'course_numbers';
 									}
@@ -1723,6 +1752,17 @@ class FLMS_Ajax {
 													if(flms_is_module_active('course_numbers')) {
 														if(isset($version_settings['course_numbers']["$credit_field"])) {
 															$fields[] = $version_settings['course_numbers']["$credit_field"];
+														} else {
+															$fields[] = "";
+														}
+													}
+												}
+											} else if($field == 'course_tabs') {
+												if(!empty($tabs)) {
+													foreach($tabs as $k => $v) {
+														$tab_name = $v['key'];
+														if(isset($version_settings['course_tabs']["$tab_name"])) {
+															$fields[] = $version_settings['course_tabs']["$tab_name"];
 														} else {
 															$fields[] = "";
 														}

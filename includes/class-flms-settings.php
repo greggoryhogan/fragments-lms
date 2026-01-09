@@ -435,37 +435,10 @@ class FLMS_Settings {
 			$course_certificates = new FLMS_Module_Course_Certificates();
 			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_certificates->get_course_certificate_labels());
 		}
-		if(flms_is_module_active('course_taxonomies')) {
-			$course_taxonomies = new FLMS_Module_Course_Taxonomies();
-            $course_tax_fields = $course_taxonomies->get_taxonomy_options();
-			$this->plugin_fields['design']['fields'] = array_merge($this->plugin_fields['design']['fields'], $course_tax_fields);
-
-			$this->plugin_fields['course_taxonomies'] = array(
-				'label' => 'Course Taxonomies',
-				'id' => 'course_taxonomies',
-				'description' => 'Set course taxonomies such as course author or field of study',
-				'tooltip' => '',
-				'fields' => $course_taxonomies->get_course_taxonomies_fields(false,true),
-				'layout' => 'grid text-top',
-			);
-		}
 		if(flms_is_module_active('course_materials')) {
 			$course_materials = new FLMS_Module_Course_Materials();
 			$this->plugin_fields['design']['fields'] = array_merge($this->plugin_fields['design']['fields'],  $course_materials->get_course_materials_settings_options());
 			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_materials->get_course_material_labels());
-		}
-		if(flms_is_module_active('course_metadata')) {
-			$course_metadata = new FLMS_Module_Course_Metadata();
-			//$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_credits->get_course_credit_labels());
-			
-			$this->plugin_fields['course_metadata'] = array(
-				'label' => 'Course Metadata',
-				'id' => 'course_metadata',
-				'description' => 'Set metadata fields for course versions',
-				'tooltip' => '',
-				'fields' => $course_metadata->get_course_metadata_fields(false,true),
-				'layout' => 'grid text-top',
-			);
 		}
 		if(flms_is_module_active('course_expiration')) {
 			$course_expiration = new FLMS_Module_Course_Expiration();
@@ -482,16 +455,42 @@ class FLMS_Settings {
 			$groups = new FLMS_Module_Groups();
 			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $groups->get_group_label_options());
 		}
-		if(flms_is_module_active('woocommerce')) {
-			$woocommerce_module = new FLMS_Module_Woocommerce();
-			$woo_fields = $woocommerce_module->get_woocommerce_module_fields();
-			$this->plugin_fields['woocommerce'] = array(
-				'label' => 'WooCommerce',
-				'id' => 'woocommerce',
-				'description' => 'Set your custom labels below',
+		if(flms_is_module_active('course_metadata')) {
+			$course_metadata = new FLMS_Module_Course_Metadata();
+			//$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_credits->get_course_credit_labels());
+			
+			$this->plugin_fields['course_metadata'] = array(
+				'label' => 'Course Metadata',
+				'id' => 'course_metadata',
+				'description' => 'Set metadata fields for course versions',
 				'tooltip' => '',
-				'layout' => 'grid',
-				'fields' => $woo_fields,
+				'fields' => $course_metadata->get_course_metadata_fields(false,true),
+				'layout' => 'grid text-top',
+			);
+		}
+		if(flms_is_module_active('course_tabs')) {
+			$course_tabs = new FLMS_Module_Course_Tabs();
+            $this->plugin_fields['course_tabs'] = array(
+				'label' => 'Course Tabs',
+				'id' => 'course_tabs',
+				'description' => 'Modify tabs to display on course landing pages',
+				'tooltip' => '',
+				'fields' => $course_tabs->get_course_tab_fields(false,true),
+				'layout' => 'grid text-top',
+			);
+		}
+		if(flms_is_module_active('course_taxonomies')) {
+			$course_taxonomies = new FLMS_Module_Course_Taxonomies();
+            $course_tax_fields = $course_taxonomies->get_taxonomy_options();
+			$this->plugin_fields['design']['fields'] = array_merge($this->plugin_fields['design']['fields'], $course_tax_fields);
+
+			$this->plugin_fields['course_taxonomies'] = array(
+				'label' => 'Course Taxonomies',
+				'id' => 'course_taxonomies',
+				'description' => 'Set course taxonomies such as course author or field of study',
+				'tooltip' => '',
+				'fields' => $course_taxonomies->get_course_taxonomies_fields(false,true),
+				'layout' => 'grid text-top',
 			);
 		}
 		if(flms_is_module_active('rest')) {
@@ -505,7 +504,6 @@ class FLMS_Settings {
 				'fields' => $rest->get_settings_fields(),
 			);
 		}
-
 		if(flms_is_module_active('white_label')) {
 			$white_label = new FLMS_Module_White_Label();
 			$this->plugin_fields['white_label'] = array(
@@ -517,6 +515,20 @@ class FLMS_Settings {
 				'fields' => $white_label->get_white_label_fields(),
 			);
 		}
+		if(flms_is_module_active('woocommerce')) {
+			$woocommerce_module = new FLMS_Module_Woocommerce();
+			$woo_fields = $woocommerce_module->get_woocommerce_module_fields();
+			$this->plugin_fields['woocommerce'] = array(
+				'label' => 'WooCommerce',
+				'id' => 'woocommerce',
+				'description' => 'Set your custom labels below',
+				'tooltip' => '',
+				'layout' => 'grid',
+				'fields' => $woo_fields,
+			);
+		}
+		
+		//fragments options
 		$this->plugin_fields['modules'] = array(
 			'label' => 'Fragments',
 			'id' => 'modules',
@@ -535,18 +547,6 @@ class FLMS_Settings {
 						'default' => 'inactive',
 						'flag_check' => '',
 						'description' => 'Deliver a certificate of completion when a custom completes a course'
-					),
-					array(
-						'label' => 'Course Materials',
-						'key' => 'course_materials',
-						'type' => 'radio',
-						'options' => array(
-							'active' => 'Active',
-							'inactive' => 'Inactive'
-						),
-						'default' => 'inactive',
-						'flag_check' => '',
-						'description' => 'Upload attachments for pre and post enrolled users'
 					),
 					array(
 						'label' => 'Course Credits',
@@ -573,8 +573,8 @@ class FLMS_Settings {
 						'description' => 'Add credits and reporting specific to financial professionals'
 					),
 					array(
-						'label' => 'Course Taxonomies',
-						'key' => 'course_taxonomies',
+						'label' => 'Course Expiration',
+						'key' => 'course_expiration',
 						'type' => 'radio',
 						'options' => array(
 							'active' => 'Active',
@@ -582,11 +582,11 @@ class FLMS_Settings {
 						),
 						'default' => 'inactive',
 						'flag_check' => '',
-						'description' => 'Assign custom taxonomies to your courses such as course author or field of study'
+						'description' => 'Allow courses to be available for a limited time before enrollment is disabled'
 					),
 					array(
-						'label' => 'Course Taxonomy Royalties',
-						'key' => 'course_taxonomy_royalties',
+						'label' => 'Course Materials',
+						'key' => 'course_materials',
 						'type' => 'radio',
 						'options' => array(
 							'active' => 'Active',
@@ -594,7 +594,7 @@ class FLMS_Settings {
 						),
 						'default' => 'inactive',
 						'flag_check' => '',
-						'description' => 'Assign royalty percentages to taxonomies and report on them using Woocommerce sales'
+						'description' => 'Upload attachments for pre and post enrolled users'
 					),
 					array(
 						'label' => 'Course Metadata',
@@ -633,8 +633,8 @@ class FLMS_Settings {
 						'description' => 'Assign and display course numbers to your course versions'
 					),
 					array(
-						'label' => 'Course Expiration',
-						'key' => 'course_expiration',
+						'label' => 'Course Tabs',
+						'key' => 'course_tabs',
 						'type' => 'radio',
 						'options' => array(
 							'active' => 'Active',
@@ -642,7 +642,31 @@ class FLMS_Settings {
 						),
 						'default' => 'inactive',
 						'flag_check' => '',
-						'description' => 'Allow courses to be available for a limited time before enrollment is disabled'
+						'description' => 'Add additional tabs to course landing pages'
+					),
+					array(
+						'label' => 'Course Taxonomies',
+						'key' => 'course_taxonomies',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Assign custom taxonomies to your courses such as course author or field of study'
+					),
+					array(
+						'label' => 'Course Taxonomy Royalties Addon',
+						'key' => 'course_taxonomy_royalties',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Assign royalty percentages to taxonomies and report on them using Woocommerce sales'
 					),
 					array(
 						'label' => 'Groups',
@@ -657,18 +681,6 @@ class FLMS_Settings {
 						'description' => 'Create groups, invite users to your group and monitor their progress'
 					),
 					array(
-						'label' => 'Woocommerce Integration',
-						'key' => 'woocommerce',
-						'type' => 'radio',
-						'options' => array(
-							'active' => 'Active',
-							'inactive' => 'Inactive'
-						),
-						'default' => 'inactive',
-						'flag_check' => '',
-						'description' => 'Sell your courses through Woocommerce'
-					),
-					array(
 						'label' => 'REST Endpoints',
 						'key' => 'rest',
 						'type' => 'radio',
@@ -679,18 +691,6 @@ class FLMS_Settings {
 						'default' => 'inactive',
 						'flag_check' => '',
 						'description' => 'Interact with courses through REST endpoints'
-					),
-					array(
-						'label' => 'Advanced Custom Fields',
-						'key' => 'acf',
-						'type' => 'radio',
-						'options' => array(
-							'active' => 'Active',
-							'inactive' => 'Inactive'
-						),
-						'default' => 'inactive',
-						'flag_check' => '',
-						'description' => 'Version ACF fields in your course content. This module is buggy at best and considered an experimental feature.'
 					),
 					array(
 						'label' => 'White Labeling',
@@ -704,6 +704,30 @@ class FLMS_Settings {
 						'flag_check' => '',
 						'description' => 'Add your own branding to Fragments LMS'
 					),
+					array(
+						'label' => 'Woocommerce Integration',
+						'key' => 'woocommerce',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Sell your courses through Woocommerce'
+					),
+					/*array(
+						'label' => 'Advanced Custom Fields',
+						'key' => 'acf',
+						'type' => 'radio',
+						'options' => array(
+							'active' => 'Active',
+							'inactive' => 'Inactive'
+						),
+						'default' => 'inactive',
+						'flag_check' => '',
+						'description' => 'Version ACF fields in your course content. This module is buggy at best and considered an experimental feature.'
+					),*/
 					
 				),
 			),
@@ -815,6 +839,10 @@ class FLMS_Settings {
 				}
 			}
 		}
+
+		/*if(isset($value['course_tabs'])) {
+			unset($value['course_tabs']);
+		}*/
 
 		//check if taxonomies changed
 		if(isset($value['course_taxonomies'])) {
