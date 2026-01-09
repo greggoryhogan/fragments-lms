@@ -843,7 +843,31 @@ class FLMS_Settings {
 		/*if(isset($value['course_tabs'])) {
 			unset($value['course_tabs']);
 		}*/
-
+		global $flms_settings;
+		if(!isset($value['archived_settings'])) {
+			$value['archived_settings'] = array();
+		}
+		if(!isset($old_value['archived_settings'])) {
+			$old_value['archived_settings'] = array();
+		}
+		if(isset($value['modules'])) {
+			foreach($value['modules'] as $module => $status) {
+				if(isset($old_value['modules'][$module]) && $old_value['modules'][$module] == 'active') {
+					if($status == 'inactive' && isset($old_value[$module])) {
+						//just deactivated, save it
+						$value['archived_settings'][$module] = $old_value[$module];
+					}
+				} else if($old_value['modules'][$module] == 'inactive' && $status == 'active') {
+					//just reactivated, load previous options
+					if(isset($old_value['archived_settings'][$module])) {
+						$value[$module] = $old_value['archived_settings'][$module];
+					}
+				} else if(isset($old_value['archived_settings'][$module])) {
+					$value['archived_settings'][$module] = $old_value['archived_settings'][$module];
+				}
+			}
+		}
+		
 		//check if taxonomies changed
 		if(isset($value['course_taxonomies'])) {
 			$new_taxonomies = $value['course_taxonomies'];
