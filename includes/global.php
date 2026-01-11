@@ -3797,3 +3797,15 @@ function flms_is_dev_env() {
 	}
 	return false;
 }
+
+function is_course_tabs_active() {
+	global $flms_settings;
+	$tabs_active = false;
+	if(isset($flms_settings['design']['show_course_tabs'])) {
+		$tab_setting = $flms_settings['design']['show_course_tabs'];
+		if($tab_setting == 'show') {
+			$tabs_active = true;
+		}
+	}
+	return apply_filters('flms_show_course_tabs', $tabs_active, $flms_settings);
+}

@@ -69,6 +69,12 @@ class FLMS_Template {
 				add_action('flms_groups_main_content', array($groups, 'flms_groups_member_content'), 10);
 				add_action('flms_groups_main_content', array($groups, 'flms_groups_member_footer_content'), 30);
 			}
+
+			if(flms_is_module_active('course_tabs')) {
+				$course_tabs = new FLMS_Module_Course_Tabs();
+				add_action('before_flms_course', array($course_tabs,'course_tab_navigation'),1); //or before_flms_course_content?
+				add_action('after_flms_course', array($course_tabs,'course_additional_tabs'),99);
+			}
 		}
 	}
 
@@ -137,7 +143,7 @@ class FLMS_Template {
 			$message = apply_filters('flms_enrolled_course_text', $message);
 			//echo flms_alert($message, false);
 			if($message != '') {
-				echo "<p>$message</p>";
+				echo "<p class='flms-enrollment-message'>$message</p>";
 			}
 			
 			echo '<div id="purchase-again" class="toggle-div '.$is_active.'">';
@@ -916,6 +922,7 @@ class FLMS_Template {
 			//echo '<pre>'.print_r($course_steps,true).'</pre>';
 			//$all_course_steps = $course->get_all_course_steps();
 			//echo '<pre>'.print_r($all_course_steps,true).'</pre>';
+			do_action('before_flms_course');
 			do_action('before_flms_course_content');
 			/*echo '<div class="flms-course-content-section">';
 			if($flms_user_has_access) {
@@ -947,6 +954,7 @@ class FLMS_Template {
 			do_action('before_flms_course_exams');
 			echo flms_get_associated_exams($flms_course_version_content["$flms_active_version"]);
 			do_action('after_flms_course_exams');
+			do_action('after_flms_course');
 		} else if($post->post_type == 'flms-lessons') {
 			do_action('before_flms_lesson_content');
 			global $flms_lesson_version_content, $flms_active_version;

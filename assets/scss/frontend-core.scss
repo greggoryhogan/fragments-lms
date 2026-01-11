@@ -1416,3 +1416,53 @@ input[disabled],
         margin: 0;
     }
 }
+
+.flms-course-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    input.flms-course-tab-toggle {
+        display: none;
+    }
+    .flms-course-tab {
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 0.3rem;
+        order: 1;
+        padding: .5rem 1rem;
+        transition: background ease 0.3s;
+        border: 1px solid var(--flms-background);
+        border-bottom: none;
+        border-top-left-radius: .5rem;
+        border-top-right-radius: .5rem;
+        margin-bottom: -1px;
+        background: #fff;
+        opacity: .7;
+        z-index: 1;
+        
+        &:hover,
+        &:focus {
+            opacity: 1;
+        }
+    }
+    .flms-course-tab-content {
+       display: none;
+        flex-grow: 1;
+        padding: 1rem;
+        width: 100%;
+        order: 2;
+        border-top: 1px solid var(--flms-background);
+        border-bottom-left-radius: .5rem;
+        border-bottom-right-radius: .5rem;
+        margin-top: -1px;
+        background: #fff;
+        z-index: 2;
+    }
+    .flms-course-tab-toggle:checked + .flms-course-tab {
+        z-index: 3;
+        background: #fff;
+        opacity: 1;
+        & + .flms-course-tab-content {
+            display: block;
+        }
+    }
+}

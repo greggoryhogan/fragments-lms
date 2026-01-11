@@ -470,6 +470,7 @@ class FLMS_Settings {
 		}
 		if(flms_is_module_active('course_tabs')) {
 			$course_tabs = new FLMS_Module_Course_Tabs();
+			$this->plugin_fields['design']['fields'] = array_merge($this->plugin_fields['design']['fields'],  $course_tabs->get_design_options());
             $this->plugin_fields['course_tabs'] = array(
 				'label' => 'Course Tabs',
 				'id' => 'course_tabs',
