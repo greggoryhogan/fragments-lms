@@ -253,12 +253,14 @@ class FLMS_Module_Course_Tabs {
         if(!is_course_tabs_active()) {
             return;
         }
-        global $flms_settings;
+        global $flms_settings, $flms_course_id, $flms_active_version, $course_tab_key;
         $tab_count = 0;
         echo '<nav class="flms-course-tabs">';
         if(isset($flms_settings['course_tabs'])) {
             if(is_array($flms_settings['course_tabs'])) {
-                foreach($flms_settings['course_tabs'] as $key => $array) {
+                $course_tabs = apply_filters('flms_course_tabs', $flms_settings['course_tabs'], $flms_course_id, $flms_active_version);
+                foreach($course_tabs  as $key => $array) {
+                    $course_tab_key = $key;
                     if(isset($array['status'])) {
                         $active = $array['status'];
                         if($active == 'active') {
@@ -272,7 +274,6 @@ class FLMS_Module_Course_Tabs {
                         break;
                     }
                 }
-                
             }
         }
     }
@@ -286,13 +287,15 @@ class FLMS_Module_Course_Tabs {
                 echo '</div>'; //close course content tab content
             }
         }
-        global $flms_settings;
+        global $flms_settings, $flms_course_id, $flms_active_version, $course_tab_key;
         if(isset($flms_settings['course_tabs'])) {
             if(is_array($flms_settings['course_tabs'])) {
-                foreach($flms_settings['course_tabs'] as $key => $array) {
+                $course_tabs = apply_filters('flms_course_tabs', $flms_settings['course_tabs'], $flms_course_id, $flms_active_version);
+                foreach($course_tabs as $key => $array) {
                     if(in_array($key, self::$captured_tabs)) {
                         continue;
                     }
+                    $course_tab_key = $key;
                     self::$captured_tabs[] = $key;
                     $active = 'active';
                     if(isset($array['status'])) {
@@ -314,18 +317,26 @@ class FLMS_Module_Course_Tabs {
         if(count(self::$captured_tabs) == 1) {
             $checked = ' checked';
         }
-        global $flms_course_version_content, $flms_active_version;
+        global $flms_course_version_content, $flms_course_id, $flms_active_version;
         $return = '<input type="radio" id="tab-'.$key.'" name="flms-course-tabs" class="flms-course-tab-toggle tab-'.$key.'"'.$checked.'>';
         $return .= '<label for="tab-'.$key.'" class="flms-course-tab">'.$name.'</label>';
         $return .= '<div class="flms-course-tab-content" id="tab-'.$key.'">';
         if($key == 'course-content') {
             return $return;
         }
+        $tab_content = '';
         if(isset($flms_course_version_content[$flms_active_version]['course_tabs'])) {
             if(isset($flms_course_version_content[$flms_active_version]['course_tabs'][$key])) {
-                $return .= apply_filters('the_content', $flms_course_version_content[$flms_active_version]['course_tabs'][$key]);
+                $tab_content = $flms_course_version_content[$flms_active_version]['course_tabs'][$key];
             }
         }
+
+        $tab_content = apply_filters('flms_tab_content', $tab_content, $key, $flms_course_id, $flms_active_version);
+
+        if($tab_content != '') {
+            $return .= $tab_content;
+        }
+
         $return .= '</div>';
         return $return;
     }

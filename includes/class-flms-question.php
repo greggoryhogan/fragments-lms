@@ -40,7 +40,8 @@ class FLMS_Question {
 			}	
 		}
 		if(isset($post_question->post_content)) {
-			$question_content = $post_question->post_content;
+			$question_content = wpautop($post_question->post_content);
+			//$question_content = $post_question->post_content;
 		}
 		if($this->question_type == '') {
 			$this->question_type = get_post_meta($this->question_id,'flms_question_type', true );
@@ -95,9 +96,9 @@ class FLMS_Question {
 							foreach($answer as $option) {
 								if($display_type != 'print' || $show_answer) {
 									$return .= '<div class="answer-option">';
-										$return .= '<label><input type="radio" name="question-'.$this->question_id.'" value="'.htmlspecialchars(html_entity_decode($option['answer'])).'"';
+										$return .= '<label><input type="radio" name="question-'.$this->question_id.'" value="'.strip_tags(htmlspecialchars_decode(html_entity_decode($option['answer']))).'"';
 										if($user_answer !== false) {
-											if(htmlspecialchars($user_answer) == htmlspecialchars(html_entity_decode($option['answer'])) && $show_answer) {
+											if(strip_tags(htmlspecialchars_decode($user_answer)) == strip_tags(htmlspecialchars_decode(html_entity_decode($option['answer']))) && $show_answer) {
 												$return .= ' checked="checked"';
 											} 
 										}
@@ -113,7 +114,7 @@ class FLMS_Question {
 										if($review == 2 && ($user_answer == $option['answer'])) {
 											$return .= '<em>';
 										}
-										$return .= $option['answer'];
+										$return .= htmlspecialchars_decode($option['answer']);
 										if($review == 2 && ($user_answer == $option['answer'])) {
 											$return .= '</em>';
 										}
@@ -300,7 +301,7 @@ class FLMS_Question {
 				$answers = array();
 				foreach($answer as $answer_option) {
 					if($answer_option['correct'] == 1) {
-						$answers[] =  htmlspecialchars(html_entity_decode($answer_option['answer']));
+						$answers[] =  strip_tags(htmlspecialchars_decode(html_entity_decode($answer_option['answer'])));
 					}
 				}
 				return $answers;
@@ -356,6 +357,7 @@ class FLMS_Question {
 	 * Check if a user answered the question correct and update reporting data for question
 	 */
 	public function grade_question($user_answer) {
+		$user_answer = strip_tags(htmlspecialchars_decode($user_answer));
 		$question_type = $this->get_question_type();
 		$question_answer = $this->get_question_answer();
 		$report_data = $this->get_report_data();

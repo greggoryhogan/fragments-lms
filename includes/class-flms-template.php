@@ -33,7 +33,7 @@ class FLMS_Template {
 			add_action('flms_main_content', array($this, 'flms_main_content'), 20, 1);
 			add_action('flms_course_content', array($this, 'flms_course_description'), 10);
 			add_action('template_redirect', array($this,'flms_access_redirect'));
-			add_action('before_flms_course_content', array($this, 'flms_enroll_actions'), 5);
+			add_action('before_flms_course_content', array( __CLASS__ , 'flms_enroll_actions'), 5);
 			if(flms_is_module_active('course_expiration')) {
 				$course_expiration = new FLMS_Module_Course_Expiration();
 				add_action('before_flms_course_content', array($course_expiration, 'flms_course_expiration_notice'), 10);
@@ -72,84 +72,86 @@ class FLMS_Template {
 
 			if(flms_is_module_active('course_tabs')) {
 				$course_tabs = new FLMS_Module_Course_Tabs();
-				add_action('before_flms_course', array($course_tabs,'course_tab_navigation'),1); //or before_flms_course_content?
-				add_action('after_flms_course', array($course_tabs,'course_additional_tabs'),99);
+				add_action('before_flms_course', array($course_tabs,'course_tab_navigation'),5); //or before_flms_course_content?
+				add_action('after_flms_course', array($course_tabs,'course_additional_tabs'),95);
 			}
 		}
 	}
 
-	public function flms_enroll_actions() {
+	public static function flms_enroll_actions() {
 		global $flms_user_has_access;
 		global $flms_settings, $flms_course_id, $flms_active_version, $flms_course_version_content, $post, $flms_latest_version;
 		if($flms_course_id != $post->ID) {
 			return;
 		}
-		$flms_user_has_access = flms_user_has_access($flms_course_id, $flms_active_version, true);
-		if(!$flms_user_has_access) {
-			//if(get_current_user_id() > 0) {
-				echo flms_enroll_course_button($flms_course_id,$flms_course_version_content["$flms_active_version"],$flms_active_version);
-			//} else {
-				//$permalink = get_permalink($flms_course_id);
-				//echo flms_login_link('Log in to enroll', $permalink);	
-			//}
-		} else {
-			$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
-			$is_active = '';
-			$active_text = apply_filters('flms_repurchase_text', 'Purchase again?', $completed);
-			$toggle_text = apply_filters('flms_repurchase_toggle_text', 'Cancel', $completed);
-			if(isset($_POST)) {
-				if(!empty($_POST)) {
-					$is_active = 'is-active';
-					$active_text = apply_filters('flms_repurchase_toggle_text', 'Cancel', $completed);
-					$toggle_text = apply_filters('flms_repurchase_text', 'Purchase again?', $completed);
+		echo '<div class="flms-enrollment-actions">';
+			$flms_user_has_access = flms_user_has_access($flms_course_id, $flms_active_version, true);
+			if(!$flms_user_has_access) {
+				//if(get_current_user_id() > 0) {
+					echo flms_enroll_course_button($flms_course_id,$flms_course_version_content["$flms_active_version"],$flms_active_version);
+				//} else {
+					//$permalink = get_permalink($flms_course_id);
+					//echo flms_login_link('Log in to enroll', $permalink);	
+				//}
+			} else {
+				$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
+				$is_active = '';
+				$active_text = apply_filters('flms_repurchase_text', 'Purchase again?', $completed);
+				$toggle_text = apply_filters('flms_repurchase_toggle_text', 'Cancel', $completed);
+				if(isset($_POST)) {
+					if(!empty($_POST)) {
+						$is_active = 'is-active';
+						$active_text = apply_filters('flms_repurchase_toggle_text', 'Cancel', $completed);
+						$toggle_text = apply_filters('flms_repurchase_text', 'Purchase again?', $completed);
+					}
 				}
-			}
-			$course_label = flms_get_label('course_singular');
-			$course_label_lc = strtolower($course_label);
-			$allow_repurchase = true;
-			if(isset($flms_course_version_content[$flms_active_version]['version_status'])) {
-				if($flms_course_version_content[$flms_active_version]['version_status'] != 'publish') {
+				$course_label = flms_get_label('course_singular');
+				$course_label_lc = strtolower($course_label);
+				$allow_repurchase = true;
+				if(isset($flms_course_version_content[$flms_active_version]['version_status'])) {
+					if($flms_course_version_content[$flms_active_version]['version_status'] != 'publish') {
+						$allow_repurchase = false;
+					}
+				}
+				if($flms_active_version != $flms_latest_version) {
 					$allow_repurchase = false;
 				}
-			}
-			if($flms_active_version != $flms_latest_version) {
-				$allow_repurchase = false;
-			}
-			$is_expired = false;
-			if(flms_is_module_active('course_expiration')) {
-				$course_expiration = new FLMS_Module_Course_Expiration();
-				$is_expired = $course_expiration->is_course_expired($flms_course_id, $flms_active_version);
-			}
-			if($completed) {
-				$text = apply_filters('flms_completed_course_text', "You have completed this $course_label_lc.", $flms_course_id, $flms_active_version );
-				$message = $text;
-				if(!$is_expired) {
-					if(apply_filters('flms_show_repurchase_link', true)) {
-						if($allow_repurchase) {
-							$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+				$is_expired = false;
+				if(flms_is_module_active('course_expiration')) {
+					$course_expiration = new FLMS_Module_Course_Expiration();
+					$is_expired = $course_expiration->is_course_expired($flms_course_id, $flms_active_version);
+				}
+				if($completed) {
+					$text = apply_filters('flms_completed_course_text', "You have completed this $course_label_lc.", $flms_course_id, $flms_active_version );
+					$message = $text;
+					if(!$is_expired) {
+						if(apply_filters('flms_show_repurchase_link', true)) {
+							if($allow_repurchase) {
+								$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+							}
+						}
+					}
+				} else {
+					$message = 'You are currently enrolled in this '.$course_label_lc.'.';
+					if(!$is_expired) {
+						if($active_text != '') {
+							if($allow_repurchase) {
+								$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+							}
 						}
 					}
 				}
-			} else {
-				$message = 'You are currently enrolled in this '.$course_label_lc.'.';
-				if(!$is_expired) {
-					if($active_text != '') {
-						if($allow_repurchase) {
-							$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
-						}
-					}
+				$message = apply_filters('flms_enrolled_course_text', $message);
+				//echo flms_alert($message, false);
+				if($message != '') {
+					echo "<p class='flms-enrollment-message'>$message</p>";
 				}
+				
+				echo '<div id="purchase-again" class="toggle-div '.$is_active.'">';
+					echo flms_enroll_course_button($flms_course_id,$flms_course_version_content["$flms_active_version"],$flms_active_version);
+				echo '</div>';
 			}
-			$message = apply_filters('flms_enrolled_course_text', $message);
-			//echo flms_alert($message, false);
-			if($message != '') {
-				echo "<p class='flms-enrollment-message'>$message</p>";
-			}
-			
-			echo '<div id="purchase-again" class="toggle-div '.$is_active.'">';
-				echo flms_enroll_course_button($flms_course_id,$flms_course_version_content["$flms_active_version"],$flms_active_version);
-			echo '</div>';
-		}
+		echo '</div>';
 	}
 
 	public function flms_purchase_course_actions() {

@@ -267,8 +267,9 @@ class FLMS_Module_Course_Materials {
                             }
                             break;
                     }
+                    $display_material = apply_filters('flms_display_course_material', $display_material, $status, $user_course_status, $course_id, $user_id);
                     //$course_material_output[] = '<div>User: '.$user_course_status.', Material: '.$status.'</div>';
-                    if($display_material && apply_filters('flms_display_course_material', true, $status, $user_course_status, $course_id, $user_id)) {
+                    if($display_material) {
                         $course_material_output[] = '<a href="'.$file.'" target="_blank" title="'.$title.'">'.$title.'</a>';
                     }
                 }
@@ -285,6 +286,8 @@ class FLMS_Module_Course_Materials {
                 $display_materials = true;
             }
         }
+        $display_materials = apply_filters('flms_course_materials', $display_materials);
+
         if(!$display_materials) {
             return '';
         }
@@ -298,7 +301,7 @@ class FLMS_Module_Course_Materials {
         }
         echo '<div class="flms-course-materials flms-flex">';
         if(apply_filters('flms_display_course_materials_label', true)) {
-            echo apply_filters('flms_course_materials_label', '<div>'.$label.':</div>');
+            echo apply_filters('flms_course_materials_label', '<div class="course-materials-label">'.$label.':</div>');
         }
             echo '<div>';
                 $sep = apply_filters('flms_course_materials_sep','<br>');

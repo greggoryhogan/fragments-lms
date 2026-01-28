@@ -156,6 +156,12 @@ function flms_get_course_lessons_list($course_data) {
 	if(apply_filters('flms_hide_course_content', false, $flms_user_has_access, $flms_course_id, $flms_active_version )) {
 		return '';
 	}
+	global $course_tab_key;
+	if($course_tab_key != '') {
+		if(apply_filters('flms_hide_course_content_for_tab', false, $course_tab_key, $flms_user_has_access, $flms_course_id, $flms_active_version)) {
+			return '';
+		}
+	}
 	$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
 	if(flms_is_module_active('course_expiration')) {
 		$course_expiration = new FLMS_Module_Course_Expiration();
@@ -475,6 +481,12 @@ function flms_get_associated_exams($course_data, $wrap = false) {
 	global $flms_user_has_access, $flms_course_id, $flms_active_version;
 	if(apply_filters('flms_hide_course_content', false, $flms_user_has_access, $flms_course_id, $flms_active_version )) {
 		return '';
+	}
+	global $course_tab_key;
+	if($course_tab_key != '') {
+		if(apply_filters('flms_hide_course_content_for_tab', false, $course_tab_key, $flms_user_has_access, $flms_course_id, $flms_active_version)) {
+			return '';
+		}
 	}
 	if(!isset($course_data["post_exams"])) {
 		return;
@@ -3012,7 +3024,8 @@ function flms_get_exam_questions($exam_id, $exam_version, $get_all_questions = f
 						$i++;
 					}
 				}
-				$exam_questions = $new_exam_questions;
+				$sorted_questions_by_original_order = array_values(array_intersect($exam_questions, $new_exam_questions));
+				$exam_questions = $sorted_questions_by_original_order;
 			}
 
 			if(isset($exam_settings['question_order'])) {

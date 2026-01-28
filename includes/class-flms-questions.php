@@ -635,6 +635,9 @@ class FLMS_Questions {
 			}
 			
 		}
+		if($question_count == $exam_count) {
+			$questions .= apply_filters('flms_after_exam_questions', '', $post_id);
+		}
 		
 		//$questions .= '</ol>';
 
@@ -655,6 +658,8 @@ class FLMS_Questions {
 					$questions .= '</div>';
 				}
 			}
+
+			$questions .= apply_filters('flms_after_exam_question_pagination', '', $post_id, $question_count, $exam_count, $review);
 
 			$questions .= '<div class="flms-navigation exam-navigation">';
 				if($page > 1) {
@@ -696,6 +701,7 @@ class FLMS_Questions {
 				$profile_link = '<a href="'.admin_url('user-edit.php?user_id='.$user_id.'#user-active-courses').'">profile page</a>';
 				$questions .= '<p><em>*Once a user has passed an exam, you cannot change their answers to a <u>failed</u> result, only correct misinterpreted questions</em>. You can reset a user&rsquo;s course progress on their '.$profile_link.'.</p>';
 			}
+
 		}
 		
 		

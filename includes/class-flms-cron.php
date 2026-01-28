@@ -172,8 +172,8 @@ class FLMS_Cron {
                             $course_tabs = new FLMS_Module_Course_Tabs();
 							$tabs = $course_tabs->get_course_tab_fields(true, true, true);
                             if(!empty($tabs)) {
-                                flms_debug($tabs);
-                                flms_debug($field_indexes);
+                                //flms_debug($tabs);
+                                //flms_debug($field_indexes);
                                 foreach($tabs as $k => $v) {
                                     $tab_name = $v['label'];
                                     $tab_key = $v['key'];
