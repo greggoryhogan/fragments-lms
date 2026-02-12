@@ -50,6 +50,7 @@ class FLMS_Question {
 		//$answer = $this->get_question_answer();
 		$answer = maybe_unserialize(get_post_meta($this->question_id,'flms_question_answer', true ));
 		//echo '<pre>'.print_r($answer,true).'</pre>';
+		
 		$user_answer = false;
 		$correct = 0;
 		if(is_array($user_answers)) {
@@ -74,6 +75,7 @@ class FLMS_Question {
 			$return .= ' nobr="true"';
 		}
 		$return .= '>';
+		
 			//$return .= print_r($user_answers,true);
 			if($this->question_type != 'prompt' && $display_type != 'print') {
 				if($count != '') {
@@ -88,6 +90,7 @@ class FLMS_Question {
 			}
 				if($display_type != 'print') {
 					$return .= '<div class="question-text">'.$question_content.'</div>';
+					//$return .= '<pre>'.print_r($user_answers, true).'</pre>';
 					$return .= '<div class="flms-answer type-'.$this->question_type.$editable.'">';
 				} 
 				switch($this->question_type) {
@@ -96,7 +99,7 @@ class FLMS_Question {
 							foreach($answer as $option) {
 								if($display_type != 'print' || $show_answer) {
 									$return .= '<div class="answer-option">';
-										$return .= '<label><input type="radio" name="question-'.$this->question_id.'" value="'.strip_tags(htmlspecialchars_decode(html_entity_decode($option['answer']))).'"';
+										$return .= '<label><input type="radio" name="question-'.$this->question_id.'" value="'.htmlspecialchars(strip_tags(html_entity_decode($option['answer']))).'"';
 										if($user_answer !== false) {
 											if(strip_tags(htmlspecialchars_decode($user_answer)) == strip_tags(htmlspecialchars_decode(html_entity_decode($option['answer']))) && $show_answer) {
 												$return .= ' checked="checked"';

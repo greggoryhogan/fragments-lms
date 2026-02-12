@@ -704,8 +704,6 @@ class FLMS_Questions {
 
 		}
 		
-		
-		
 		return array(
 			'uid' => $user_id,
 			'questions' => $questions,

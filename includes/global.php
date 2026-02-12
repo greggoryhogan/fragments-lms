@@ -3038,6 +3038,7 @@ function flms_get_exam_questions($exam_id, $exam_version, $get_all_questions = f
 	} else {
 		$exam_questions = array();
 	}
+	$exam_questions = apply_filters('flms_exam_questions', $exam_questions, $exam_id, $exam_settings);
 	return $exam_questions;
 }
 

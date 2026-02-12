@@ -24,23 +24,23 @@ class FLMS_Template {
 	public function __construct() {
 		if(self::$instances == 0) {
 			self::$instances++;
-			add_filter( 'single_template', array($this, 'load_flms_templates' ) );
-			add_filter( 'archive_template', array($this, 'load_flms_archive_templates' ) );
-			add_action('flms_after_heading', array($this, 'flms_course_notices'), 5);
-			add_action('flms_before_my_courses',array($this, 'flms_course_notices'), 5);
-			add_action('flms_before_my_groups',array($this, 'flms_course_notices'), 5);
-			add_action('flms_before_heading', array($this,'flms_breadcrumbs'),10);
-			add_action('flms_main_content', array($this, 'flms_main_content'), 20, 1);
-			add_action('flms_course_content', array($this, 'flms_course_description'), 10);
-			add_action('template_redirect', array($this,'flms_access_redirect'));
+			add_filter( 'single_template', array(__CLASS__, 'load_flms_templates' ) );
+			add_filter( 'archive_template', array(__CLASS__, 'load_flms_archive_templates' ) );
+			add_action('flms_after_heading', array(__CLASS__, 'flms_course_notices'), 5);
+			add_action('flms_before_my_courses',array(__CLASS__, 'flms_course_notices'), 5);
+			add_action('flms_before_my_groups',array(__CLASS__, 'flms_course_notices'), 5);
+			add_action('flms_before_heading', array(__CLASS__,'flms_breadcrumbs'),10);
+			add_action('flms_main_content', array(__CLASS__, 'flms_main_content'), 20, 1);
+			add_action('flms_course_content', array(__CLASS__, 'flms_course_description'), 10);
+			add_action('template_redirect', array(__CLASS__,'flms_access_redirect'));
 			add_action('before_flms_course_content', array( __CLASS__ , 'flms_enroll_actions'), 5);
 			if(flms_is_module_active('course_expiration')) {
 				$course_expiration = new FLMS_Module_Course_Expiration();
 				add_action('before_flms_course_content', array($course_expiration, 'flms_course_expiration_notice'), 10);
 			}
 			if(flms_is_module_active('course_certificates')) {
-				//add_action('before_flms_course_content', array($this, 'flms_show_course_certificate'), 7);
-				add_action('after_flms_course_exams', array($this, 'flms_show_previous_completion_certificates'), 10);
+				//add_action('before_flms_course_content', array(__CLASS__, 'flms_show_course_certificate'), 7);
+				add_action('after_flms_course_exams', array(__CLASS__, 'flms_show_previous_completion_certificates'), 10);
 			}
 			if(flms_is_module_active('course_taxonomies')) {
 				$course_taxonomies = new FLMS_Module_Course_Taxonomies();
@@ -55,8 +55,8 @@ class FLMS_Template {
 				add_action('before_flms_course_content', array($course_credits, 'flms_course_credits'), 14);
 			}
 			add_action('after_flms_main_content', 'flms_course_navigation', 10);
-			add_action('before_flms_course_content', array($this, 'flms_course_percentage'), 15);
-			add_action('after_flms_lesson_content', array($this,'output_lesson_video'), 30);
+			add_action('before_flms_course_content', array(__CLASS__, 'flms_course_percentage'), 15);
+			add_action('after_flms_lesson_content', array(__CLASS__,'output_lesson_video'), 30);
 
 			add_action( 'woocommerce_before_shop_loop_item_title', 'woocommerce_show_product_loop_sale_flash', 10 );
 			add_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
@@ -154,7 +154,7 @@ class FLMS_Template {
 		echo '</div>';
 	}
 
-	public function flms_purchase_course_actions() {
+	public static function flms_purchase_course_actions() {
 		global $flms_user_has_access;
 		global $flms_settings, $flms_course_id, $flms_active_version, $flms_course_version_content, $post;
 		if($flms_course_id != $post->ID) {
@@ -166,7 +166,7 @@ class FLMS_Template {
 		}
 	}
 
-	public function output_lesson_video() {
+	public static function output_lesson_video() {
 		global $post;
 		global $flms_lesson_version_content, $flms_active_version;
 		$video_settings = flms_get_video_settings_default_fields();
@@ -245,7 +245,7 @@ class FLMS_Template {
 						echo '<div id="flms-content-video" class="flms-video '.$aspect_ratio.'">';
 							echo '<iframe type="text/html" id="'.$iframe_id.'" '.$video.' '.$fullscreen.' allow=""></iframe>';
 							if(($type != 'youtube' || $type != 'local') && $controls == 0) {
-								echo $this->flms_video_playpause();
+								echo self::flms_video_playpause();
 							}
 						echo '</div>';
 					}
@@ -260,7 +260,7 @@ class FLMS_Template {
 					</video>
 					<?php 
 					if($controls == 0) {
-						echo $this->flms_video_playpause(); 
+						echo self::flms_video_playpause(); 
 					} ?>
 				</div><?php 
 				}
@@ -271,7 +271,7 @@ class FLMS_Template {
 		//}
 	}
 
-	public function flms_video_playpause() {
+	public static function flms_video_playpause() {
 		$controls = '<div class="flms-play-pause">';
 			$controls .= '<div class="action play-pause-btn play-pause-btn--pause"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M 360 -320 h 80 v -320 h -80 v 320 Z m 160 0 h 80 v -320 h -80 Z Z Z m 0 -320 Z"></path></svg></div>';
 			$controls .= '<div class="action play-pause-btn play-pause-btn--play is-active"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="m 380 -300 l 280 -180 l -280 -180 Z Z m 0 -80 Z Z"></path></svg></div>';
@@ -284,7 +284,7 @@ class FLMS_Template {
 		return $controls;
 	}
 
-	public function flms_access_redirect() {
+	public static function flms_access_redirect() {
 		global $post, $wp;
 		
 		if(!$post) {
@@ -459,7 +459,7 @@ class FLMS_Template {
 	/**
 	 * Load master template for flms
 	 */
-	public function load_flms_templates($template) {
+	public static function load_flms_templates($template) {
 		global $wp;
 		
 		global $post;
@@ -486,7 +486,7 @@ class FLMS_Template {
 	/**
 	 * Load archive template for flms
 	 */
-	public function load_flms_archive_templates($template) {
+	public static function load_flms_archive_templates($template) {
 		global $post, $wp;
 		$directory = FLMS_ABSPATH .'/template/';
 		if(isset($post->post_type)) {
@@ -514,7 +514,7 @@ class FLMS_Template {
 		return $template;
 	}
 
-	public function flms_breadcrumbs( $echo = true ) {
+	public static function flms_breadcrumbs( $echo = true ) {
 		global $wp;
 		if ( apply_filters( 'flms_show_breadcrumbs', true ) ) {
 			$breadcrumbs = '<div class="flms-breadcrumbs flms-course-content-section">';
@@ -527,14 +527,14 @@ class FLMS_Template {
 					$lesson_id = flms_get_topic_version_parent($post->ID);
 					$course_id = get_post_meta($lesson_id,'flms_course',true);
 				}
-				$breadcrumbs .= $this->get_breadcrumbs_pt_output($post->ID,$post->post_type);
+				$breadcrumbs .= self::get_breadcrumbs_pt_output($post->ID,$post->post_type);
 			$breadcrumbs .= '</div>';
 			echo $breadcrumbs;
 		}
 		
 	}
 
-	public function get_breadcrumbs_pt_output($post_id,$post_type) {
+	public static function get_breadcrumbs_pt_output($post_id,$post_type) {
 		global $wp;
 		$breadcrumbs = '';
 		$sep = apply_filters('flms_breadcrumb_separator', ' > ');
@@ -706,7 +706,7 @@ class FLMS_Template {
 		return $breadcrumbs;
 	}
 
-	public function flms_course_notices() {
+	public static function flms_course_notices() {
 		global $post, $flms_course_id, $flms_active_version, $flms_user_has_access, $flms_settings;
 		$course_label = flms_get_label('course_singular');
 		$course_label_lc = strtolower($course_label);
@@ -825,7 +825,7 @@ class FLMS_Template {
 		
 	}
 
-	public function flms_course_description($flms_course_id) {
+	public static function flms_course_description($flms_course_id) {
 		global $flms_course_version_content, $flms_active_version;
 		if($flms_course_id == '') {
 			global $post;
@@ -869,7 +869,7 @@ class FLMS_Template {
 
 	}
 
-	public function flms_main_content() {
+	public static function flms_main_content() {
 		do_action('before_flms_main_content');
 		global $post, $flms_settings, $current_user;
 		if(!flms_is_flms_post_type($post)) {
@@ -992,7 +992,7 @@ class FLMS_Template {
 		do_action('after_flms_main_content');
 	}
 
-	public function flms_course_percentage() {
+	public static function flms_course_percentage() {
 		if(apply_filters('flms_show_course_progress_bar', true)) {
 			global $flms_course_id, $flms_active_version;
 			$course = new FLMS_Course($flms_course_id);
@@ -1027,7 +1027,7 @@ class FLMS_Template {
 		}
 	}	
 
-	public function flms_show_course_certificate() {
+	public static function flms_show_course_certificate() {
 		global $flms_course_id, $flms_active_version, $current_user;
 		$course = new FLMS_Course($flms_course_id);
 		$completed = flms_user_completed_course($flms_course_id, $flms_active_version);
@@ -1042,7 +1042,7 @@ class FLMS_Template {
 		}
 	}
 
-	public function flms_show_previous_completion_certificates() {
+	public static function flms_show_previous_completion_certificates() {
 		global $flms_course_id, $flms_active_version, $current_user, $flms_settings;
 		//$course = new FLMS_Course($flms_course_id);
 		$completed = flms_get_customer_past_course_completions($flms_course_id, $flms_active_version);
@@ -1059,14 +1059,14 @@ class FLMS_Template {
 			}
 			echo apply_filters('flms_course_certificates_heading', "<h2 class='flms-course-certificate-heading'>$heading</h2>", $completed);
 			echo '<div class="flms-course-certificates-list flms-flex flex-column">';
-				$this->flms_get_all_course_certificates();
+				self::flms_get_all_course_certificates();
 			echo '</div>';
 		
 		} 
 		
 	}
 
-	public function flms_get_all_course_certificates($max_display = false, $echo = true, $show_heading = true, $location = 'course') {
+	public static function flms_get_all_course_certificates($max_display = false, $echo = true, $show_heading = true, $location = 'course') {
 		global $flms_course_id, $flms_active_version, $current_user, $flms_settings;
 		$course_certificates = new FLMS_Module_Course_Certificates();
 		$date_format = get_option( 'date_format' );

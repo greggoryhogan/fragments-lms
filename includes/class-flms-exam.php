@@ -352,7 +352,7 @@ class FLMS_Exam {
 		flms_track_exam_time($user_id, $exam_identifier);
 	}
 
-	public function grade_exam($user_id, $exam_update = false) {
+	public function grade_exam($user_id, $admin_updating_exam_answers = false) {
 		global $flms_active_version, $flms_exam_id, $flms_course_id;
 		$exam_identifier = "$flms_exam_id:$flms_active_version";
 
@@ -501,8 +501,11 @@ class FLMS_Exam {
 		$meta_key = "flms_{$exam_identifier}_exam_attempts";
 		$attempts = get_user_meta($user_id, $meta_key, true);
 
-
-		$score = 100 * round($total_correct / $total_questions, 2);
+		if($total_correct > 0) {
+			$score = 100 * round($total_correct / $total_questions, 2);
+		} else {
+			$score = 0;
+		}
 		$meta_key = "flms_{$exam_identifier}_exam_attempt_{$attempts}";
 		$data = array(
 			'exam_id' => $flms_exam_id,
@@ -517,7 +520,7 @@ class FLMS_Exam {
 
 		$data['submission_error'] = 0;
 		//remove old attempts
-		if(!$exam_update) {
+		if(!$admin_updating_exam_answers) {
 			for ($i = 1; $i < $attempts; $i++) {
 				$meta_key = "flms_{$exam_identifier}_exam_attempt_{$i}";
 				delete_user_meta($user_id, $meta_key);
@@ -564,11 +567,11 @@ class FLMS_Exam {
 			$meta_key = "flms_{$exam_identifier}_extra_exam_attempts";
 			delete_user_meta($user_id, $meta_key);
 
-			
+			do_action('flms_after_exam_completed', $flms_exam_id, $flms_active_version, $user_id );
 			
 			
 		} else {
-			if(!$exam_update) {
+			if(!$admin_updating_exam_answers) {
 
 				$exam_log_id = $course_progress->log_user_activity($user_id, $flms_exam_id, $flms_active_version, "failed");
 				//see if they have remaining attempts
@@ -608,14 +611,19 @@ class FLMS_Exam {
 					//remove old additional attempts
 					$meta_key = "flms_{$exam_identifier}_extra_exam_attempts";
 					delete_user_meta($user_id, $meta_key);
+					
 				}
 			}
 			
+			do_action('flms_after_exam_failed', $flms_exam_id, $flms_active_version, $user_id );
+
 		}
 
 		if($exam_log_id != false) {
 			$course_progress->save_exam_completion_time($exam_log_id, $flms_exam_id, $flms_active_version, $user_id );
 		}
+
+		do_action('flms_after_exam_attempt', $flms_exam_id, $flms_active_version, $user_id );
 
 		return $data;
 	}

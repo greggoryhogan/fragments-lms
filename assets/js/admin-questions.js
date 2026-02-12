@@ -35,6 +35,7 @@
             } else {
                 $('.sample-draw-category-sample-draw-exam-option').hide();
             }
+            wp.hooks.doAction('flms_show_exam_question_fields', exam_type);
         }
     }
 

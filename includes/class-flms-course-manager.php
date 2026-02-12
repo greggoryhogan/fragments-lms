@@ -189,6 +189,7 @@ class FLMS_Course_Manager {
 					'category-sample-draw' => 'Category Sample Draw',
 					'cumulative' => 'Cumulative',
 				);
+				$options = apply_filters('flms_exam_options', $options);
 				echo '<select name="flms_exam_type" id="flms_exam_type" class="flms-full-width">';
 				foreach($options as $k => $v) {
 					echo '<option value="'.$k.'"';
@@ -276,6 +277,7 @@ class FLMS_Course_Manager {
 					'linear' => 'Linear',
 					'random' => 'Random',
 				);
+				$options = apply_filters('flms_exam_question_order', $options);
 				$question_order = 'linear';
 				if(isset($exam_settings['question_order'])) {
 					$question_order = $exam_settings['question_order'];
