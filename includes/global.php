@@ -916,8 +916,11 @@ function flms_user_has_access($post_id, $course_version = 1, $hard_query = false
 		$course_version = $flms_active_version;
 	}
 	if(current_user_can('administrator')) {
-		$flms_user_has_access = true;
-		return $flms_user_has_access;
+		$force_acess = apply_filters('flms_admin_user_has_access', true, $post_id, $course_version);
+		if($force_acess) {
+			$flms_user_has_access = true;
+			return $flms_user_has_access;
+		}
 	}
 	if($flms_user_has_access != '' && !$hard_query) {
 		return $flms_user_has_access;

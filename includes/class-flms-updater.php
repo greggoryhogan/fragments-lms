@@ -21,3 +21,5 @@ $myUpdateChecker = PucFactory::buildUpdateChecker(
 );
 
 $myUpdateChecker->setBranch('master');
+
+$myUpdateChecker->getVcsApi()->enableReleaseAssets(); // trigger using release
