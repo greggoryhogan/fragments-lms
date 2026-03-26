@@ -246,6 +246,7 @@ class FLMS_Module_Course_Materials {
                     $title = $material['title'];
                     $status = $material['status'];
                     $file = $material['file'];
+                    $link_title = apply_filters('flms_course_material_title', $material['title'], $status, $file, $course_id, $course_version);
                     $display_material = false;
                     switch($status) {
                         case 'any':
@@ -270,7 +271,7 @@ class FLMS_Module_Course_Materials {
                     $display_material = apply_filters('flms_display_course_material', $display_material, $status, $user_course_status, $course_id, $user_id);
                     //$course_material_output[] = '<div>User: '.$user_course_status.', Material: '.$status.'</div>';
                     if($display_material) {
-                        $course_material_output[] = '<a href="'.$file.'" target="_blank" title="'.$title.'">'.$title.'</a>';
+                        $course_material_output[] = '<a href="'.$file.'" target="_blank" title="'.$title.'">'.$link_title.'</a>';
                     }
                 }
             } 

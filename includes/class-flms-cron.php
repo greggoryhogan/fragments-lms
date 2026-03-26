@@ -838,7 +838,7 @@ class FLMS_Cron {
                 } else {
                     //insert or update title, content
                     if($import_action == 'insert') {
-                        if ( FALSE === get_post_status( $question_id ) ) {
+                        if ( $question_id == '' ) {
                             // The post does not exist, ok to insert
                             $question_args['post_type'] = 'flms-questions';
                             $question_id = wp_insert_post( $question_args );
