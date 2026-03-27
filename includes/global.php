@@ -2814,7 +2814,8 @@ function flms_get_user_activity($user_id = 0, $course_id = 0, $course_version = 
 
 function flms_get_user_course_status($user_id, $course_id, $course_version = 1) {
 	$user_progress = new FLMS_Course_Progress();
-	return $user_progress->get_user_course_status($user_id, $course_id, $course_version);
+	$course_status = $user_progress->get_user_course_status($user_id, $course_id, $course_version);
+	return apply_filters('flms_user_course_status', $course_status, $user_id, $course_id, $course_version);
 }
 
 function flms_update_user_activity($post_id, $user_id = 0, $course_id = 0, $version = 0) {

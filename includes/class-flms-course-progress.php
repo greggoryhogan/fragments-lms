@@ -98,13 +98,22 @@ class FLMS_Course_Progress {
 		$sql_query = $wpdb->prepare("SELECT id, customer_status FROM $table WHERE course_id=%d AND course_version=%d AND customer_id=%d ORDER BY id DESC LIMIT 1", $course_id, $course_version, $user_id);
 		$results = $wpdb->get_results( $sql_query, ARRAY_A ); 
 		if(!empty($results)) {
-			return $results[0];
+			$status = $results[0];
 		} else {
-			return array(
+			$status = array(
 				'id' => false,
 				'customer_status' => 'pre-enrollment'
 			);
+		};
+		if(current_user_can('administrator')) {
+			$force_acess = apply_filters('flms_admin_user_has_access', true, $course_id, $course_version);
+			if($force_acess) {
+				if($status['customer_status'] != 'completed') {
+					$status['customer_status'] = 'enrolled';
+				}
+			}
 		}
+		return $status;
 	}
 
 	public function update_user_activity_log($user_id, $course_id, $course_version, $status, $reenroll = false) {
