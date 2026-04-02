@@ -1279,7 +1279,11 @@ function flms_get_user_completed_course_list($user_id, $active_courses, $echo = 
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
-						$list .= '<div data-label="'.$course_label.' Number:" class="flms-course-number">'.$course_numbers->get_course_number($course_id, $course_version).'</div>';
+						$args = array(
+							'course_version' => $course_version
+						);
+						$course_number = $course_numbers->get_course_number($course_id, $args);
+						$list .= '<div data-label="'.$course_label.' Number:" class="flms-course-number">'.$course_number.'</div>';
 					}
 					/*$list .= '<div data-label="Enrolled:">';
 					if(isset($active_course['enroll_date'])) {
@@ -1425,7 +1429,10 @@ function flms_get_user_expired_course_list($user_id, $completed_courses, $echo =
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
-						$course_number = $course_numbers->get_course_number($course_id, $course_version);
+						$args = array(
+							'course_version' => $course_version
+						);
+						$course_number = $course_numbers->get_course_number($course_id, $args);
 						if($course_number == '' && is_admin()) {
 							$course_number = 'N/A';
 						}
@@ -1645,7 +1652,10 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
-						$course_number = $course_numbers->get_course_number($course_id, $course_version);
+						$args = array(
+							'course_version' => $course_version
+						);
+						$course_number = $course_numbers->get_course_number($course_id, $args);
 						if($course_number == '' && is_admin()) {
 							$course_number = 'N/A';
 						}

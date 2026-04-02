@@ -861,7 +861,11 @@ class FLMS_Reports {
                                         $query_results = $wpdb->get_results( $sql_query ); 
                                         if(!empty($query_results)) {
                                             $course_version = $query_results[0]->course_version;
-                                            $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                            $args = array(
+                                                'course_version' => $course_version,
+                                                'context' => array('type' => 'report', 'report_type' => 'royalies')
+                                            );
+                                            $course_number = $course_numbers->get_course_number($course_id, $args);
                                         } else {
                                             //backward compatibility for early date bug in courses
                                             $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date'] . ' +1 day'));
@@ -869,11 +873,19 @@ class FLMS_Reports {
                                             $query_results = $wpdb->get_results( $sql_query ); 
                                             if(!empty($query_results)) {
                                                 $course_version = $query_results[0]->course_version;
-                                                $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                                $args = array(
+                                                    'course_version' => $course_version,
+                                                    'context' => array('type' => 'report', 'report_type' => 'royalies')
+                                                );
+                                                $course_number = $course_numbers->get_course_number($course_id, $args);
                                             } else {
-                                                $course_number = $course_numbers->get_course_number($course_id);
+                                                $args = array(
+                                                    'context' => array('type' => 'report', 'report_type' => 'royalies')
+                                                );
+                                                $course_number = $course_numbers->get_course_number($course_id, $args);
                                             }
                                         }
+                                        
                                         $response .= '<td data-title="Course number">'.$course_number.'</td>';
                                     }
                                     $response .= '<td data-title="Title">'.$course_link.'</td>';
@@ -1393,8 +1405,6 @@ class FLMS_Reports {
                             foreach($course_orders as $data) {
                                 $fields = array();
                                 if(flms_is_module_active('course_numbers')) {
-                                    //$course_numbers = new FLMS_Module_Course_Numbers();
-                                    //$course_number = $course_numbers->get_course_number($course_id, 'inherit', 'global');
                                     $user_id = $data['user_id'];
                                     $table = FLMS_ACTIVITY_TABLE;
                                     $start_query_date = date('Y-m-d 00:00:00', strtotime($data['order_date']));
@@ -1403,7 +1413,11 @@ class FLMS_Reports {
                                     $query_results = $wpdb->get_results( $sql_query ); 
                                     if(!empty($query_results)) {
                                         $course_version = $query_results[0]->course_version;
-                                        $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                        $args = array(
+                                            'course_version' => $course_version,
+                                            'context' => array('type' => 'report-export', 'report_type' => 'royalies')
+                                        );
+                                        $course_number = $course_numbers->get_course_number($course_id, $args);
                                     } else {
                                         //backward compatibility for early date bug in courses
                                         $end_query_date = date('Y-m-d 23:59:59', strtotime($data['order_date'] . ' +1 day'));
@@ -1411,9 +1425,16 @@ class FLMS_Reports {
                                         $query_results = $wpdb->get_results( $sql_query ); 
                                         if(!empty($query_results)) {
                                             $course_version = $query_results[0]->course_version;
-                                            $course_number = $course_numbers->get_course_number($course_id, $course_version);
+                                            $args = array(
+                                                'course_version' => $course_version,
+                                                'context' => array('type' => 'report-export', 'report_type' => 'royalies')
+                                            );
+                                            $course_number = $course_numbers->get_course_number($course_id, $args);
                                         } else {
-                                            $course_number = $course_numbers->get_course_number($course_id);
+                                            $args = array(
+                                                'context' => array('type' => 'report-export', 'report_type' => 'royalies')
+                                            );
+                                            $course_number = $course_numbers->get_course_number($course_id, $args);
                                         }
                                     }
                                     $fields[] = $course_number;
@@ -1510,11 +1531,22 @@ class FLMS_Reports {
             }
 
             if(flms_is_module_active('course_numbers')) {
-                global $flms_course_version_content;
+                /*global $flms_course_version_content;
                 $data['course_number'] = '';
                 if(isset($flms_course_version_content["$course_version"]['course_numbers'][$credit_type])) {
                     $data['course_number'] = $flms_course_version_content["$course_version"]['course_numbers'][$credit_type];
+                }*/
+                $course_numbers = new FLMS_Module_Course_Numbers();
+                $report_type = 'report';
+                if($export) {
+                    $report_type = 'report-export';
                 }
+                $args = array(
+                    'course_version' => $course_version,
+                    'type' => $credit_type,
+                    'context' => array('type' => $report_type, 'report_type' => 'credits', 'credit_type' => $credit_type)
+                );
+                $data['course_number'] = $course_numbers->get_course_number($course_id, $args); 
             }
             //$response .= '<td>'.$result->course_version.'</td>';
             //$response .= '<td>'.ucwords($result->customer_status).'</td>';

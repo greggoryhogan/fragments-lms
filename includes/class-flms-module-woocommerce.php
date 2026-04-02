@@ -1701,7 +1701,10 @@ class FLMS_Module_Woocommerce {
                     $course_version = $course_info[1];
 
                     $course_numbers = new FLMS_Module_Course_Numbers();
-                    $course_number = $course_numbers->get_course_number($course_id, $course_version); 
+                    $args = array(
+                        'course_version' => $course_version
+                    );
+                    $course_number = $course_numbers->get_course_number($course_id, $args); 
                     if($course_number != '') {
                         //$item_name .= '<div class="flms-cart-item-data">';
                         $course_number_text = '';
@@ -3329,7 +3332,10 @@ class FLMS_Module_Woocommerce {
                     $course_version = $course_info[1];
 
                     $course_numbers = new FLMS_Module_Course_Numbers();
-                    $course_number = $course_numbers->get_course_number($course_id, $course_version); 
+                    $args = array(
+                        'course_version' => $course_version
+                    );
+                    $course_number = $course_numbers->get_course_number($course_id, $args); 
                     if($course_number != '') {
                         if(strpos($course_number,'#') === false) {
                             $text .= '#';
@@ -3345,36 +3351,6 @@ class FLMS_Module_Woocommerce {
         return $name;
     }
     public function flms_order_item_quantity_group_seats($text, $item) {
-        /*if(flms_is_module_active('course_numbers')) {
-            $product_id = $item->get_product_id();
-            $variation_id = $item->get_variation_id();
-            $courses = '';
-            if($variation_id !== '') {
-                $courses = get_post_meta( $variation_id, 'flms_woocommerce_variable_course_ids', true );
-            } else {
-                $courses = get_post_meta( $product_id, 'flms_woocommerce_simple_course_ids', true );
-            }
-            if($courses != '') {
-                foreach($courses as $course_data) {
-                    $course_info = explode(':',$course_data);
-                    $course_id = $course_info[0];
-                    $course_version = $course_info[1];
-
-                    $course_numbers = new FLMS_Module_Course_Numbers();
-                    $course_number = $course_numbers->get_course_number($course_id, $course_version); 
-                    if($course_number != '') {
-                        $text .= '<div class="flms-cart-item-data">';
-                            if(strpos($course_number,'#') === false) {
-                                $text .= '#';
-                            } 
-                            $text .= $course_number;
-                        $text .= '</div>';
-                    }
-                    
-                }
-            }
-            
-        }*/
         if ( isset( $item['group_seats'] ) ){
             $value = absint($item['group_seats']);
             $label = flms_get_label('groups_singular') .' '.flms_get_label('seats_plural');

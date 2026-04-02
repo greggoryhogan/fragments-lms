@@ -64,7 +64,11 @@ class FLMS_Module_Course_Numbers {
             }
         } 
         $post_id = $post->ID;
-        $course_number = $this->get_course_number($post_id, $course_version, $type);
+        $args = array(
+            'course_version' => $course_version, 
+            'type' => $type
+        );
+        $course_number = $this->get_course_number($post_id, $args);
         $flms_active_version = $course_version;
         if($course_number != '') {
             $return = '';
@@ -106,17 +110,26 @@ class FLMS_Module_Course_Numbers {
         $course->update_course_version_field('course_numbers', $course_numbers);
     }
 
-    public function get_course_number($post_id, $active_version = 'inherit', $type = 'global') {
+    public function get_course_number($post_id, $args = array()) {
+        $defaults = array(
+            'course_version' => 'inherit',
+            'type' => 'global',
+            'context' => '',
+        );
+        $args = array_merge($defaults, $args);
+        $version = $args['course_version'];
+        $type = $args['type'];
+        $course_number = '';
         $course = new FLMS_Course($post_id);
-        if($active_version == 'inherit') {
+        if($version == 'inherit') {
             global $flms_active_version;
-            $active_version = $flms_active_version;
+            $version = $flms_active_version;
         }
         global $flms_course_version_content;
-        if(isset($flms_course_version_content[$active_version]['course_numbers'][$type])) {
-            return $flms_course_version_content[$active_version]['course_numbers'][$type];
+        if(isset($flms_course_version_content[$version]['course_numbers'][$type])) {
+            $course_number = $flms_course_version_content[$version]['course_numbers'][$type];
         }
-        return '';
+        return apply_filters('flms_course_number', $course_number, $post_id, $args);
     }
 
 }
