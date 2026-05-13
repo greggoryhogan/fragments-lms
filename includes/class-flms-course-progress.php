@@ -106,10 +106,12 @@ class FLMS_Course_Progress {
 			);
 		};
 		if(current_user_can('administrator')) {
-			$force_acess = apply_filters('flms_admin_user_has_access', true, $course_id, $course_version);
-			if($force_acess) {
-				if($status['customer_status'] != 'completed') {
-					$status['customer_status'] = 'enrolled';
+			if(!is_admin()) {
+				$force_acess = apply_filters('flms_admin_user_has_access', true, $course_id, $course_version);
+				if($force_acess) {
+					if($status['customer_status'] != 'completed') {
+						$status['customer_status'] = 'enrolled';
+					}
 				}
 			}
 		}

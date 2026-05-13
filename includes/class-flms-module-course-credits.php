@@ -409,7 +409,7 @@ class FLMS_Module_Course_Credits {
         return $fields;
     }
 
-    public function get_course_credit_labels() {
+    public function get_settings_course_credit_labels() {
         $fields = array(
             array(
                 'label' => 'Course Credits',
@@ -448,7 +448,7 @@ class FLMS_Module_Course_Credits {
                 'default' => 'Select Credit Reporting',
             )
         );
-        $available_fields = $this->get_course_credits_fields(true, true, true);
+        $available_fields = $this->get_course_credits_fields(true, true, false);
         if(!empty($available_fields)) {
             foreach($available_fields as $field) {
                 $fields[] = array(

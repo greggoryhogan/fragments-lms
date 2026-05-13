@@ -16,7 +16,7 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
 	'https://github.com/greggoryhogan/fragments-lms/', // GitHub URL of your repo
-	FLMS_PLUGIN_PATH, // Path to your plugin file
+	FLMS_PLUGIN_FILE, // Path to your plugin file
 	'flms' // The plugin slug (unique identifier for your plugin)
 );
 

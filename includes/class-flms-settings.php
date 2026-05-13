@@ -420,7 +420,7 @@ class FLMS_Settings {
 		);
 		if(flms_is_module_active('course_credits')) {
 			$course_credits = new FLMS_Module_Course_Credits();
-			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_credits->get_course_credit_labels());
+			$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_credits->get_settings_course_credit_labels());
 			
 			$this->plugin_fields['course_credits'] = array(
 				'label' => 'Course Credits',
@@ -457,7 +457,6 @@ class FLMS_Settings {
 		}
 		if(flms_is_module_active('course_metadata')) {
 			$course_metadata = new FLMS_Module_Course_Metadata();
-			//$this->plugin_fields['labels']['fields'] = array_merge($this->plugin_fields['labels']['fields'],  $course_credits->get_course_credit_labels());
 			
 			$this->plugin_fields['course_metadata'] = array(
 				'label' => 'Course Metadata',
@@ -931,9 +930,11 @@ class FLMS_Settings {
 			}
 		}
 
-		if($value['course_expiration']['course_expiration_schedule'] != $old_value['course_expiration']['course_expiration_schedule']) {
-			if ( wp_next_scheduled( 'flms_expired_course_check' ) ) {
-				wp_clear_scheduled_hook( 'flms_expired_course_check' );
+		if(isset($value['course_expiration']['course_expiration_schedule']) && isset($old_value['course_expiration']['course_expiration_schedule'])) {
+			if($value['course_expiration']['course_expiration_schedule'] != $old_value['course_expiration']['course_expiration_schedule']) {
+				if ( wp_next_scheduled( 'flms_expired_course_check' ) ) {
+					wp_clear_scheduled_hook( 'flms_expired_course_check' );
+				}
 			}
 		}
 		return $value;

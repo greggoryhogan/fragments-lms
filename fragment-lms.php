@@ -3,7 +3,7 @@
 Plugin Name:  Fragments LMS
 Plugin URI:	  https://fragmentlms.com
 Description:  Learning management software built for developers, by developers
-Version:	  1.5.1
+Version:	  1.5.2
 Author:		  Fragment
 Author URI:   https://fragmentwebworks.com
 License:      GPL2
@@ -19,7 +19,7 @@ if ( ! defined( 'FLMS_PLUGIN_FILE' ) ) {
 	define( 'FLMS_PLUGIN_FILE', __FILE__ );
 }
 if ( ! defined( 'FLMS_PLUGIN_PATH' ) ) {
-	define( 'FLMS_PLUGIN_PATH', __FILE__);
+	define( 'FLMS_PLUGIN_PATH', plugin_dir_path( __FILE__ ));
 }
 
 // Include the main WooCommerce class.

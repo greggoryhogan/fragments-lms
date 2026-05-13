@@ -140,6 +140,7 @@ class FLMS_Shortcodes {
 	}
 
 	public function course_list($atts) {
+		do_action('flms_before_course_list_shortcode');
 		global $flms_settings;
 		
 		$layout = 'list';
@@ -333,6 +334,8 @@ class FLMS_Shortcodes {
 				if(!empty($results)) {
 					//print_r($results);
 					$course_ids[] = $results;
+				} else {
+					$course_ids[] = array(0); // Something not found so we need to break it
 				}
 			}
 			//echo '<pre>'.print_r($course_ids,true).'</pre>';
@@ -342,7 +345,7 @@ class FLMS_Shortcodes {
 			if(empty($course_ids)) {
 				$course_ids = array(0);
 			}
-
+			//print_r($course_ids);
 			//search courses for post_content and course_preview
 			/*if(isset($_GET['course-term'])) {
 				$search_term = stripslashes(sanitize_text_field($_GET['course-term']));

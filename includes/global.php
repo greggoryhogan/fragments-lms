@@ -1247,6 +1247,8 @@ function flms_get_user_completed_course_list($user_id, $active_courses, $echo = 
 		foreach($active_courses as $active_course) {
 			//print_r($active_course);
 			//$data = explode(':',$active_course['course']);
+			global $flms_active_version, $course_entry_id;
+			$course_entry_id = $active_course['id'];
 			$course_id = $active_course['course_id'];
 			$course_version = $active_course['course_version'];
 			/*$course_data = get_post_meta($course_id,'flms_version_content',true);
@@ -1268,14 +1270,16 @@ function flms_get_user_completed_course_list($user_id, $active_courses, $echo = 
 				
 			}*/
 			$course = new FLMS_Course($course_id);
-			global $flms_active_version;
 			$flms_active_version = $course_version;
 			$title = $course->get_course_version_name($course_version);
 			
 			$permalink = $course->get_course_version_permalink($course_version,true);
 			
 			//$list .= '<div class="course-list-item '.$extra_class.'">';
-				$list .= '<div class="course-name flms-course-name flms-entry-id-'.$active_course['id'].'-course-name" data-label="'.$course_label.':"><a href="'.$permalink.'" title="View '.strip_tags($title).'">'.$title.'</a></div>';
+				$list .= '<div class="course-name flms-course-name flms-entry-id-'.$active_course['id'].'-course-name" data-label="'.$course_label.':">';
+				$list .= '<a href="'.$permalink.'" title="View '.strip_tags($title).'">'.$title;
+				$list .= apply_filters('flms_after_my_courses_course_title', '', $course_entry_id, $course_id, $course_version, $user_id );
+				$list .= '</a></div>';
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
@@ -1313,6 +1317,7 @@ function flms_get_user_completed_course_list($user_id, $active_courses, $echo = 
 						$list .= apply_filters('flms_completed_course_action', $course_actions, $course_id, $course_version);
 						if(is_admin()) {
 							$list .= '<a href="#" class="profile-delete-entry" data-entry-id="'.$active_course['id'].'">Delete from course history</a>';
+							$list .= apply_filters('flms_admin_profile_completed_course_actions', '', $course_entry_id, $course_id, $course_version, $user_id);
 						}
 						$list .= apply_filters('flms_completed_course_actions', '', $course_id, $course_version);
 
@@ -1621,10 +1626,12 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 			//$list .= '</div>';
 		//$list .= '</div>';
 		foreach($completed_courses as $active_course) {
+			//echo '<pre>'.print_r($active_course, true).'</pre>';
+			global $flms_active_version, $course_entry_id;
+			$course_entry_id = $active_course['id'];
 			$course_id = $active_course['course_id'];
 			$course_version = $active_course['course_version'];
 			$course = new FLMS_Course($course_id);
-			global $flms_active_version;
 			$flms_active_version = $course_version;
 			$flms_user_activity = flms_get_user_activity($user_id, $course_id, $course_version);
 			$steps_completed = maybe_unserialize($active_course['steps_completed']);
@@ -1648,7 +1655,10 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 
 			
 			//$list .= '<div class="course-list-item '.$extra_class.'">';
-				$list .= '<div class="course-name" data-label="'.$course_label.':"><a href="'.$permalink.'" title="'.$link_title.'">'.$title.'</a></div>';
+				$list .= '<div class="course-name" data-label="'.$course_label.':">';
+				$list .= '<a href="'.$permalink.'" title="'.$link_title.'">'.$title;
+				$list .= apply_filters('flms_after_my_courses_course_title', '', $course_entry_id, $course_id, $course_version, $user_id );
+				$list .= '</a></div>';
 				//$list .= '<div class="course-meta">';
 					if(flms_is_module_active('course_numbers')) {
 						$course_numbers = new FLMS_Module_Course_Numbers();
@@ -1716,6 +1726,7 @@ function flms_get_user_active_course_list($user_id, $completed_courses, $echo = 
 								}
 							}
 						}
+						$list .= apply_filters('flms_admin_profile_active_course_actions', '', $course_entry_id, $course_id, $course_version, $user_id);
 						$list .= '</div>';
 						//$list .= print_r($exams,true);
 					} else {

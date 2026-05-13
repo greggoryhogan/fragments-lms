@@ -64,6 +64,7 @@ class FLMS_Module_Woocommerce {
         //filter products shortcode to exclude archived courses
         add_filter('woocommerce_shortcode_products_query', array($this, 'exclude_archived_course_from_shortcode'), 10, 3);
         if(flms_is_module_active('course_credits')) {
+            global $flms_settings;
             global $flms_course_credit_types;
             $course_credits = new FLMS_Module_Course_Credits();
             $flms_course_credit_types = $course_credits->get_course_credit_fields();
