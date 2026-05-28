@@ -69,7 +69,6 @@ class FLMS_Module_Course_Certificates {
 			'index.php?post_type=flms-certificates&certificate-course=$matches[1]&certificate-course-version=$matches[2]&certificate-user=$matches[3]&certificate-entry-id=$matches[4]',
 			'top'
 		);
-        flush_rewrite_rules();
     }
 
     public function register_query_vars($query_vars) {

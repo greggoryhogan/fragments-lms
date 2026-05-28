@@ -471,6 +471,13 @@ class FLMS_Setup {
 			'top'
 		);
 
+		//export pdf report
+		add_rewrite_rule(
+            '^report-export/?$',
+            'index.php?report_export=1',
+            'top'
+        );
+
 		//printing exam
 		add_rewrite_rule(
 			"^print-{$exam_permalink}/([^/]+)/([^/]+)/?$",
@@ -847,6 +854,9 @@ class FLMS_Setup {
 		$query_vars[] = 'print-exam-version';
 		$query_vars[] = 'print-exam-user-id';
 		
+		//report export query vars
+		$query_vars[] = 'report_export';
+
 		if(flms_is_module_active('course_certificates')) {
 			$course_certificates = new FLMS_Module_Course_Certificates();
 			$query_vars = $course_certificates->register_query_vars($query_vars);

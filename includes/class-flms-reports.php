@@ -2,6 +2,7 @@
 class FLMS_Reports {
     public function __construct() {
         add_action('admin_menu', array($this,'register_reports_page'));
+        add_action('template_redirect', array($this, 'report_pdf_export_output'));
 	}
 
     public function register_reports_page() {
@@ -354,7 +355,13 @@ class FLMS_Reports {
                             $questions = $exam->get_exam_question_ids();
                             //TODO: Update query for exam questions when using questions by category
                             if(!empty($questions)) {
-                                $response = '<div class="reports-header"><div class="reports-key"><div class="correct">Correct</div><div class="incorrect">Incorrect</div></div><div class="toggle-table-tooltips" id="expand-report-toggle"></div></div>';
+                                $export_url = add_query_arg(
+                                    $data,
+                                    home_url('/report-export/')
+                                );
+                                $response = '<div class="reports-header"><a href="'.$export_url.'" class="button button-primary" target="_blank">Export as PDF</a></div>';
+                                
+                                $response .= '<div class="reports-header"><div class="reports-key"><div class="correct">Correct</div><div class="incorrect">Incorrect</div></div><div class="toggle-table-tooltips" id="expand-report-toggle"></div></div>';
                                 $response .= '<table class="answers-analysis"><tr><th>Question</th><th>Type</th><th>Answer</th><th>% Correct</th></tr>';
                                 foreach($questions as $question_id) {
                                     $question = new FLMS_Question($question_id);
@@ -1127,7 +1134,7 @@ class FLMS_Reports {
                 );
                 break;
             case 'answers':
-                return '';
+                
                 break;
             case 'course_credits': 
                 $exporter = new FLMS_Exporter();
@@ -1470,6 +1477,260 @@ class FLMS_Reports {
                 
         }
 		
+    }
+
+    public function trim_export_text($text, $limit = 100) {
+
+        if (strlen($text) <= $limit) {
+            return $text;
+        }
+
+        $text = substr($text, 0, $limit);
+
+        // Remove partial word at end
+        $text = substr($text, 0, strrpos($text, ' '));
+
+        return $text . '...';
+    }
+    public function report_pdf_export_output() {
+        if (get_query_var('report_export')) {
+            
+            // Process custom logic
+            // Output JSON, CSV, XML, etc.
+
+            if(!isset($_GET['report-type'])) {
+                wp_redirect(get_bloginfo('url'));
+                exit;
+            }
+            $type = sanitize_text_field($_GET['report-type']);
+            switch($type) {
+                case 'answers':
+                    echo 'Answers';
+                
+                    if(!isset($_GET['flms-course-select']) || !isset($_GET['flms-version-select']) || !isset($_GET['flms-exam-select'])) {
+                        wp_redirect(get_bloginfo('url'));
+                        exit;
+                    }
+
+                    
+                    $course_id = absint($_GET['flms-course-select']);
+                    $version = absint($_GET['flms-version-select']);
+                    $exam_id = absint($_GET['flms-exam-select']);
+                    
+                    if($course_id == 0) {
+                        wp_redirect(get_bloginfo('url'));
+                        exit;
+                    } else {
+                        //$report_information .= '<div><span>Course:</span> '.flms_get_the_title($course_id).'</div>';
+                        
+                        if($version == -1) {
+                            wp_redirect(get_bloginfo('url'));
+                            exit;
+                        } else {
+                            $course = new FLMS_Course($course_id);
+                            $version_name = $course->get_course_version_name($version);
+                            
+                            if($exam_id == 0) {
+                                wp_redirect(get_bloginfo('url'));
+                                exit;
+                            } else {
+                                $exam = new FLMS_Exam($exam_id);
+                                $flms_active_version = $version;
+                                $questions = $exam->get_exam_question_ids();
+                                //TODO: Update query for exam questions when using questions by category
+                                if(!empty($questions)) {
+
+                                    require_once dirname( FLMS_PLUGIN_FILE ) . '/vendor/autoload.php';
+
+                                    $mpdf = new \Mpdf\Mpdf(['default_font_size' => 9, 'default_font' => 'frutiger']);
+
+
+                                    // create new PDF document
+                                    //$pdf = new BABEL_WORKBOOK_PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, array(215.9, 279.4), true, 'UTF-8', false);
+                                    $exam_title = get_the_title($exam_id);
+                                    $pdf_title = "Answer Analysis - $exam_title";
+                                    $mpdf->SetTitle($pdf_title);
+                                    $mpdf->setHeader('<table width="100%" cellpadding="3"><tr><th width="25%">Question</th><th width="65%">Answer</th><th width="10%">% Correct</th></tr></table>');
+                                    $mpdf->SetFooter('<table><tr><td>Correct answers shown in <strong>bold</strong>, response count per answer shown in parenthesis.</td></tr></table>');
+                                    $response = '';
+                                    $response .= '<style>
+                                    .page {
+                                        position: relative;
+                                        margin: 0;
+                                        padding: 0;
+                                        width: 100%;
+                                        height: 100%;
+                                        overflow: hidden;
+                                        background-color: #fff;
+                                        padding: 20mm 10mm;
+                                    }
+                                    .correct {font-weight: bold;}
+                                    .answer-total {
+                                        background: #2271b1;
+                                        color: #fff;
+                                        display: block;
+                                        border-radius: 50px;
+                                        text-align: center;
+                                        padding: 2px;
+                                        font-weight: normal;
+                                        
+                                        }
+                                        .low-percentage {
+                                        color: #ff0000;
+                                        font-weight: bold;}
+                                    .answer-text {height: 20px;overflow:hidden;}
+                                    table, th, tr, td {text-align:left; }
+                                    </style>';
+
+                                    $response .= '<table cellpadding="3">';
+
+                                    foreach($questions as $question_id) {
+
+                                        $question = new FLMS_Question($question_id);
+                                        $question_type = $question->get_question_type();
+
+                                        if($question_type == 'prompt') {
+                                            continue;
+                                        }
+
+                                        $question_name   = flms_get_the_title($question_id);
+                                        $question_data   = $question->get_report_data();
+                                        $question_answer = $question->get_question_answer();
+                                        $correct_count   = 0;
+                                        $total           = 0;
+
+                                        $response .= '<tr>';
+
+                                        // Question column
+                                        $response .= '<td data-title="Question:" width="25%" style="vertical-align:top; text-align:left;">';
+                                            $response .= $this->trim_export_text($question_name, 40);
+                                        $response .= '</td>';
+
+                                        // Answer columns
+                                        if($question_data === false || !is_array($question_data)) {
+
+                                            $response .= '<td data-title="Answers:" colspan="4" width="66%" style="vertical-align:top; text-align:left;">';
+                                                $response .= '<em>No data</em>';
+                                            $response .= '</td>';
+
+                                        } else {
+
+                                            switch($question_type) {
+
+                                                case 'single-choice':
+
+                                                    $answer = isset($question_answer[0]) ? $question_answer[0] : '';
+                                                    $answer_columns = array_slice($question_data, 0, 4, true);
+                                                    $column_count = 4;
+
+                                                    foreach($question_data as $k => $v) {
+                                                        $total += (int) $v;
+
+                                                        if($answer == $k) {
+                                                            $correct_count = (int) $v;
+                                                        }
+                                                    }
+
+                                                    $i = 0;
+
+                                                    foreach($answer_columns as $k => $v) {
+
+                                                        $response .= '<td data-title="Answers:" width="16.5%" style="vertical-align:top; text-align:left; padding-right:10px;">';
+                                                        if($answer == $k) {
+                                                            $response .= '<strong>';
+                                                        }
+
+                                                        $response .= $this->trim_export_text($k, 17);
+
+                                                        if($answer == $k) {
+                                                            $response .= '</strong>';
+                                                        }
+
+                                                        $response .= ' ('.$v.')';
+
+                                                        $response .= '</td>';
+
+                                                        $i++;
+                                                    }
+
+                                                    // Fill remaining answer columns if fewer than 4 answers
+                                                    while($i < $column_count) {
+                                                        $response .= '<td width="16.5%" style="vertical-align:top; text-align:left;">&nbsp;</td>';
+                                                        $i++;
+                                                    }
+
+                                                    break;
+
+                                                default:
+
+                                                    $response .= '<td data-title="Answers:" colspan="4" width="66%" style="vertical-align:top; text-align:left;">&nbsp;</td>';
+
+                                                    foreach($question_data as $k => $v) {
+                                                        $total += (int) $v;
+                                                    }
+
+                                                    break;
+                                            }
+                                        }
+
+                                        if($total > 0) {
+                                            $percent = number_format(100 * ($correct_count / $total), 2);
+                                        } else {
+                                            $percent = 0;
+                                        }
+
+                                        // Percent column
+                                        $response .= '<td width="9%" data-title="Percent Correct: " style="vertical-align:top; text-align:left;"';
+
+                                        if(absint($percent) <= 50) {
+                                            $response .= ' class="low-percentage"';
+                                        } else if(absint($percent) <= 75) {
+                                            $response .= ' class="medium-percentage"';
+                                        } else {
+                                            $response .= ' class="high-percentage"';
+                                        }
+
+                                        $response .= '>';
+
+                                        if($question_type != 'essay' && $question_type != 'assessment' && $total > 0) {
+                                            $response .= '<span class="percentage">'.$percent.'%</span>';
+                                        } else {
+                                            $response .= 'N/A';
+                                        }
+
+                                        $response .= '</td>';
+
+                                        $response .= '</tr>';
+                                    }
+
+                                    $response .= '</table>';
+                                    if(!isset($_GET['orientation'])) {
+                                        $mpdf->AddPage('L');
+                                    }
+                                    $mpdf->writeHTML($response);
+                                    $mpdf->Output($pdf_title, 'I');
+                                } else {
+                                    wp_redirect(get_bloginfo('url'));
+                                    exit;
+                                }
+                                //$response .= print_r($questions,true);    
+                            }
+                            
+                            //$question_category = $data['flms-question-category'];
+                        }
+                        
+                    }
+                    //$response .= print_r($data,true);
+                    
+                    exit;
+                    break;
+                default:
+                    wp_redirect( get_bloginfo('url') );
+                    exit;
+            }
+            wp_redirect( get_bloginfo('url') );
+            exit;
+        }
     }
 
     public function get_customer_credit_data($result, $credit_type, $export = false) {

@@ -670,6 +670,8 @@ class FLMS_Exam {
 									'numberposts' => -1,
 									'post_status' => 'publish',
 									'fields' => 'ids',
+									'orderby' => 'menu_order',
+									'order' => 'asc',
 									'tax_query' => array(
 										array(
 											'taxonomy' => 'flms-question-categories',
