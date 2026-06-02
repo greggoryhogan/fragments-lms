@@ -350,9 +350,10 @@ class FLMS_Reports {
                             $response = 'Please select an exam.';
                         } else {
                             $report_information .= '<div data-flms-exam-select="'.$exam_id.'"><span>Exam:</span> '.flms_get_the_title($exam_id).'</div>';
-                            $exam = new FLMS_Exam($exam_id);
-                            $flms_active_version = $version;
-                            $questions = $exam->get_exam_question_ids();
+                            //$exam = new FLMS_Exam($exam_id);
+                            //$flms_active_version = $version;
+                            //$questions = $exam->get_exam_question_ids();
+                            $questions = flms_get_exam_questions($exam_id, $version);
                             //TODO: Update query for exam questions when using questions by category
                             if(!empty($questions)) {
                                 $export_url = add_query_arg(
@@ -384,12 +385,15 @@ class FLMS_Reports {
                                                     $answer = $question_answer[0];
                                                     $response .= '<div class="answer-reports">';
                                                     foreach($question_data as $k => $v) {
+                                                        $clean = fn($s) => preg_replace('/\s+/u', ' ', str_replace(['’','‘','“','”'], ["'","'",'"','"'], trim(html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+                                                        $is_same = $clean($answer) === $clean($k);
                                                         $response .= '<div';
-                                                        if($answer == $k) {
+                                                        if($is_same) {
                                                             $response .= ' class="correct"';
                                                             $correct_count = $v;
                                                         }
-                                                        $response .= '><span class="answer-total">'.$v.'</span><div class="flms-table-tooltip" title="'.$k.'"></div></div>';
+                                                            $response .= '><span class="answer-total">'.$v.'</span><div class="flms-table-tooltip" title="'.$k.'"></div>';
+                                                        $response .= '</div>';
                                                     }
                                                     $response .= '</div>';
                                                     break;
@@ -1505,8 +1509,7 @@ class FLMS_Reports {
             $type = sanitize_text_field($_GET['report-type']);
             switch($type) {
                 case 'answers':
-                    echo 'Answers';
-                
+                    
                     if(!isset($_GET['flms-course-select']) || !isset($_GET['flms-version-select']) || !isset($_GET['flms-exam-select'])) {
                         wp_redirect(get_bloginfo('url'));
                         exit;
@@ -1625,8 +1628,9 @@ class FLMS_Reports {
 
                                                     foreach($question_data as $k => $v) {
                                                         $total += (int) $v;
-
-                                                        if($answer == $k) {
+                                                        $clean = fn($s) => preg_replace('/\s+/u', ' ', str_replace(['’','‘','“','”'], ["'","'",'"','"'], trim(html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+                                                        $is_same = $clean($answer) === $clean($k);
+                                                        if($is_same) {
                                                             $correct_count = (int) $v;
                                                         }
                                                     }
@@ -1636,13 +1640,15 @@ class FLMS_Reports {
                                                     foreach($answer_columns as $k => $v) {
 
                                                         $response .= '<td data-title="Answers:" width="16.5%" style="vertical-align:top; text-align:left; padding-right:10px;">';
-                                                        if($answer == $k) {
+                                                        $clean = fn($s) => preg_replace('/\s+/u', ' ', str_replace(['’','‘','“','”'], ["'","'",'"','"'], trim(html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+                                                        $is_same = $clean($answer) === $clean($k);
+                                                        if($is_same) {
                                                             $response .= '<strong>';
                                                         }
 
                                                         $response .= $this->trim_export_text($k, 17);
 
-                                                        if($answer == $k) {
+                                                        if($is_same) {
                                                             $response .= '</strong>';
                                                         }
 
