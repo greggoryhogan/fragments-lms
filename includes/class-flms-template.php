@@ -1094,7 +1094,7 @@ class FLMS_Template {
 			if(apply_filters('flms_show_certificate_links_as_button', true, $location)) {
 				$response .= '<button class="button button-primary flms-button-has-link flms-certificate-link" data-flms-button-link="'.$link.'" data-name="'.$label.'">'.$label.'</button>';
 			} else {
-				$response .= '<a href="'.$link.'" class="flms-certificate-link" target="_blank" title="'.$label.'">'.$label.'</a>';
+				$response .= '<a href="'.$link.'" class="flms-certificate-link" target="_blank" title="'.strip_tags($label).'">'.$label.'</a>';
 			}
 		}
 		if($echo) {

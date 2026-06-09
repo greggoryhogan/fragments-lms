@@ -208,13 +208,19 @@ function flms_get_course_lessons_list($course_data) {
 							$lesson_html .= '<div class="lesson-header">';
 								$lesson_html .= '<div class="lesson-actions">';	
 									$lesson_html .= '<div class="flms-step-header">';
+										if($flms_user_has_access || $sample || $completed) {
+											$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">';
+										} else {
+											$lesson_html .= '<span class="flms-lesson-link flms-primary">';
+										}
 										if($flms_user_has_access || $completed) {
 											$lesson_html .= flms_step_complete_checkbox($lesson_id, $completed);
 										}
+										$lesson_html .= flms_get_the_title($lesson_id, 'flms-step');
 										if($flms_user_has_access || $sample || $completed) {
-											$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">'.flms_get_the_title($lesson_id, 'flms-step').'</a>';
+											$lesson_html .= '</a>';
 										} else {
-											$lesson_html .= '<span class="flms-lesson-link flms-primary">'.flms_get_the_title($lesson_id, 'flms-step').'</span>';
+											$lesson_html .= '</span>';
 										}
 									$lesson_html .= '</div>';
 									
@@ -294,14 +300,18 @@ function flms_get_lesson_topics_list($lessons) {
 							$lesson_html .= '<div class="lesson-actions">';	
 								$lesson_html .= '<div class="flms-step-header">';
 									if($flms_user_has_access || $completed) {
-										$lesson_html .= flms_step_complete_checkbox($lesson_id);
+										$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">';
+									} else {
+										$lesson_html .= '<span class="flms-lesson-link flms-primary">';
 									}
 									if($flms_user_has_access || $completed) {
-										$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">';
+										$lesson_html .= flms_step_complete_checkbox($lesson_id, $completed);
 									}
 									$lesson_html .= flms_get_the_title($lesson_id, 'flms-step');
 									if($flms_user_has_access || $completed) {
 										$lesson_html .= '</a>';
+									} else {
+										$lesson_html .= '</span>';
 									}
 								$lesson_html .= '</div>';
 							$lesson_html .= '</div>';
@@ -343,17 +353,17 @@ function flms_get_lesson_topics_html($lesson_id, $show_heading = true) {
 				$topic = new FLMS_Topic($topic_id);
 				$lesson_html .= '<li>';
 				$lesson_html .= '<div class="flms-step-header">';
+
+					if($flms_user_has_access || $completed) {
+						$lesson_html .= '<a href="'.get_permalink($topic_id).'" class="flms-lesson-link flms-primary">';
+					} 
 					if($flms_user_has_access || $completed) {
 						$lesson_html .= flms_step_complete_checkbox($topic_id, $completed);
 					}
-					if($flms_user_has_access || $lesson_is_sample || $completed) {
-						$lesson_html .= '<a href="'.get_permalink($topic_id).'" class="flms-primary">';
-						
-					}
 					$lesson_html .= flms_get_the_title($topic_id, 'flms-step');
-					if($flms_user_has_access || $lesson_is_sample || $completed) {
+					if($flms_user_has_access || $completed) {
 						$lesson_html .= '</a>';
-					}
+					} 
 				$lesson_html .= '</div>';
 				/*$topic_exams = $topic->get_topic_version_exams();
 				if(!empty($topic_exams)) {
@@ -382,10 +392,10 @@ function flms_get_lesson_topics_html($lesson_id, $show_heading = true) {
 			if($exam_id > 0) {
 				$lesson_html .= '<div class="flms-step-header">';
 					if($flms_user_has_access || $completed) {
-						$lesson_html .= flms_step_complete_checkbox($exam_id, $completed);
-					}
+						$lesson_html .= '<a href="'.get_permalink($exam_id).'" class="flms-lesson-link flms-primary">';
+					} 
 					if($flms_user_has_access || $completed) {
-						$lesson_html .= '<a href="'.get_permalink($exam_id).'" class="flms-primary">';
+						$lesson_html .= flms_step_complete_checkbox($exam_id, $completed);
 					}
 					$lesson_html .= flms_get_the_title($exam_id, 'flms-step');
 					if($flms_user_has_access || $completed) {
@@ -515,15 +525,15 @@ function flms_get_associated_exams($course_data, $wrap = false) {
 					$lesson_html .= '">';
 						$lesson_html .= '<div class="flms-step-header">';
 							if($flms_user_has_access || $completed) {
-								$lesson_html .= flms_step_complete_checkbox($lesson_id, $completed);
+								$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">';
 							}
 							if($flms_user_has_access || $completed) {
-								$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-primary">';
-							} 
-							$lesson_html .= flms_get_the_title($lesson_id, 'flms-step');
-							if($flms_user_has_access) {
-								$lesson_html .= '</a>';
+								$lesson_html .= flms_step_complete_checkbox($lesson_id, $completed);
 							}
+							$lesson_html .= flms_get_the_title($lesson_id, 'flms-step');
+							if($flms_user_has_access || $completed) {
+								$lesson_html .= '</a>';
+							} 
 						$lesson_html .= '</div>';
 						//$lesson_html .= '<div><a href="'.get_permalink($lesson_id).'" class="flms-lesson-link flms-primary">'.flms_get_the_title($lesson_id).'</a></div>';
 						//$lesson_html .= flms_get_lesson_topics_html($lesson_id,false);
@@ -554,10 +564,11 @@ function flms_print_exams($exams, $wrap = false) {
 					if($lesson_id > 0) {
 						$lesson_html .= '<div>';
 							$lesson_html .= '<div class="flms-step-header">';
+								$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-primary">';
 								if($flms_user_has_access) {
 									$lesson_html .= flms_step_complete_checkbox($lesson_id);
 								}
-								$lesson_html .= '<a href="'.get_permalink($lesson_id).'" class="flms-primary">'.flms_get_the_title($lesson_id, 'flms-step').'</a>';
+								$lesson_html .= flms_get_the_title($lesson_id, 'flms-step').'</a>';
 							$lesson_html .= '</div>';
 						$lesson_html .= '</div>';
 					}
