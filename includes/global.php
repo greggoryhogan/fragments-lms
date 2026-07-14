@@ -3158,7 +3158,8 @@ function flms_my_courses_output($course_id, $layout = 'list') {
 					}
 				}
 				$course_credits = new FLMS_Module_Course_Credits();
-				$credits_array = $course_credits->get_course_credits_fields(true,true);
+				$credits_array = apply_filters('flms_course_output_credit_fields', $course_credits->get_course_credits_fields(true,true));
+
 				//$output .=  '<pre>'.print_r($credits_array,true).'</pre>';
 				$credits_output = array();
 				if(!empty($credits_array)) {

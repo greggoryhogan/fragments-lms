@@ -41,7 +41,8 @@ class FLMS_Module_Woocommerce {
         add_action('woocommerce_payment_complete', array($this,'enroll_customer_courses'));
         add_action( 'woocommerce_order_status_changed', array($this,'enroll_on_status_change'), 10, 4 );
         
-        add_action( 'woocommerce_order_refunded', array( $this, 'remove_course_access_on_refund' ) );
+        //add_action( 'woocommerce_order_refunded', array( $this, 'remove_course_access_on_refund' ) );
+        add_action( 'woocommerce_refund_created', array( $this, 'remove_course_access_on_refund_items_restock' ), 10, 2 );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'remove_course_access' ), 10, 1 );
 		add_action( 'woocommerce_order_status_failed', array( $this, 'remove_course_access' ), 10, 1 );
         
@@ -1376,11 +1377,14 @@ class FLMS_Module_Woocommerce {
     }
 
     /**
-     * Unenroll customer
+     * Unenroll customer when order is refunded
+     * This is not active since it can't access restock, use remove_course_access_on_refund_items_restock() instead
      */
     public function remove_course_access_on_refund($order_id) {
         $order = wc_get_order( $order_id );  
         if ( $order ) {
+            //only process if order is not completed
+            
             $products = [];
             $refunds  = $order->get_refunds();
 
@@ -1393,6 +1397,37 @@ class FLMS_Module_Woocommerce {
             $order->add_order_note(__('Customer unenrolled in course(s) due to refund', 'flms'));
         }
 
+    }
+
+    public function remove_course_access_on_refund_items_restock($refund_id, $args) {
+        if ( empty( $args['restock_items'] ) ) {
+            return;
+        }
+
+        $refund = wc_get_order( $refund_id );
+
+        if ( ! $refund ) {
+            return;
+        }
+
+        $order_id = $refund->get_parent_id();
+        $order    = wc_get_order( $order_id );
+
+        if ( ! $order ) {
+            return;
+        }
+
+        $products = $refund->get_items();
+
+        if ( empty( $products ) ) {
+            return;
+        }
+
+        $this->remove_course_access( $order_id, null, $products );
+
+        $order->add_order_note(
+            __( 'Customer unenrolled in course(s) due to refund', 'flms' )
+        );
     }
 
     public function remove_course_access($order_id, $products = array()) {

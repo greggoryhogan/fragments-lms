@@ -551,7 +551,7 @@ class FLMS_Module_Course_Credits {
 
         $fields = array_merge($default_fields,$fields);
 
-        return $fields;
+        return apply_filters('flms_course_credits_fields', $fields);
     }
 
     public function replace_tmp_fields($credit_name, $form_fields, $name, $status, $license, $fee_type, $fee, $description, $parent) {

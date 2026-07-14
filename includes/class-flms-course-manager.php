@@ -1119,8 +1119,8 @@ class FLMS_Course_Manager {
 			}
 
 			global $flms_latest_version, $flms_course_version_content;
-			krsort($versions);
 			if(is_array($versions)) {
+				krsort($versions);
 				$version_content = $versions["{$active_version}"];
 				$return .= '<div class="settings-field">';
 					$return .= '<label>Course completed additional content ';
@@ -1171,8 +1171,8 @@ class FLMS_Course_Manager {
 			global $flms_latest_version, $flms_course_version_content;
 			//echo '<pre>'.print_r($flms_course_version_content[$flms_latest_version], true).'</pre>';
 			//Sort by descending value (krsort because we use v1,v2.. to store the data instead of using numbers)
-			krsort($versions);
 			if(is_array($versions)) {
+				krsort($versions);
 				$return .= '<div class="settings-field">';
 					$return .= '<div class="setting-field-label">';
 						$return .= 'Version Name ';

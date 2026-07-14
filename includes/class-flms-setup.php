@@ -1135,7 +1135,6 @@ class FLMS_Setup {
 		}
 		$course_id = flms_get_course_id($post->ID);
 		$versions = get_post_meta($course_id,'flms_version_content',true);
-		ksort($versions);
 		if(is_array($versions)) {
 			$version = '';
 			if(isset($wp->query_vars['course-version'])) {

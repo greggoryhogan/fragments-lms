@@ -265,7 +265,6 @@ class FLMS_Shortcodes {
 			} else {
 				$credit_query_string = implode('', $credit_strings);
 			}
-
 			
 			/*$query_strings = array(
 				"course_id IN (SELECT course_id FROM $table WHERE $status_string)",
@@ -327,6 +326,7 @@ class FLMS_Shortcodes {
 			$course_ids = array();
 			foreach($query_strings as $query_string) {
 				$sql_query = "SELECT DISTINCT course_id FROM $table WHERE $query_string";	
+				$sql_query = apply_filters('flms_course_search_sql_query', $sql_query);
 				//echo $sql_query.'<br><br>';
 				//$sql = $wpdb->prepare( $sql_query );
 				//$results = $wpdb->get_results( $sql );
