@@ -273,7 +273,7 @@ class FLMS_Shortcodes {
 
 			$query_strings = array(
 				'course_status' => "$status_string",
-				'course_credits' => "$credit_query_string"
+				'credit_type' => "$credit_query_string"
 			);
 			
 			if(isset($_GET['course-term'])) {
