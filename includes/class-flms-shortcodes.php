@@ -272,8 +272,8 @@ class FLMS_Shortcodes {
 			);*/
 
 			$query_strings = array(
-				"$status_string",
-				"$credit_query_string"
+				'course_status' => "$status_string",
+				'course_credits' => "$credit_query_string"
 			);
 			
 			if(isset($_GET['course-term'])) {
@@ -315,18 +315,17 @@ class FLMS_Shortcodes {
 						}
 
 					}
-					$query_strings[] = $default;
+					$query_strings['course_term'] = $default;
 
 					
 				}
 			} 
-			
 			//$query_string = implode(' AND ', $query_strings);
 			
 			$course_ids = array();
-			foreach($query_strings as $query_string) {
+			foreach($query_strings as $query_type => $query_string) {
 				$sql_query = "SELECT DISTINCT course_id FROM $table WHERE $query_string";	
-				$sql_query = apply_filters('flms_course_search_sql_query', $sql_query);
+				$sql_query = apply_filters('flms_course_search_sql_query', $sql_query, $query_type);
 				//echo $sql_query.'<br><br>';
 				//$sql = $wpdb->prepare( $sql_query );
 				//$results = $wpdb->get_results( $sql );
@@ -407,10 +406,10 @@ class FLMS_Shortcodes {
 					foreach($flms_settings['course_taxonomies'] as $taxonomy_name => $options) {
 						if($options['filter-status'] == 'show') {
 							if(isset($_GET[$taxonomy_name])) {
-								$tax_value = absint($_GET[$taxonomy_name]);
-								if($tax_value > 0) {
+								$tax_value = apply_filters('flms_course_search_tax_term', absint($_GET[$taxonomy_name]), sanitize_text_field( $taxonomy_name ));
+								if($tax_value > 0 || is_array($tax_value)) {
 									$tax_queries[] = array(
-										'taxonomy' => $taxonomy_name,
+										'taxonomy' => sanitize_text_field($taxonomy_name),
 										'field' => 'term_id',
 										'terms' => $tax_value
 									);
