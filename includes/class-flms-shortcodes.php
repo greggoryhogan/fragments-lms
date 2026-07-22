@@ -140,6 +140,10 @@ class FLMS_Shortcodes {
 	}
 
 	public function course_list($atts) {
+
+		$shortcode_page_id = get_queried_object_id();
+		$shortcode_url     = get_permalink( $shortcode_page_id );
+
 		do_action('flms_before_course_list_shortcode');
 		global $flms_settings;
 		
@@ -469,20 +473,22 @@ class FLMS_Shortcodes {
 					$courses_ouput .= flms_my_courses_output(get_the_ID(),$atts['layout']);
 				}
 			$courses_ouput .= '</div>';
-			$courses_ouput .= '<div class="flms-course-pagination">';
-				$big = 999999999; // need an unlikely integer
+			if ( $course_query->max_num_pages > 1 ) {
+				$courses_ouput .= '<div class="flms-course-pagination">';
+
 				$courses_ouput .= paginate_links(
 					array(
-						'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
-						'format' => '?paged=%#%',
-						'current' => max(
-							1,
-							get_query_var('paged')
-						),
-						'total' => $course_query->max_num_pages //$q is your custom query
+						'base'      => trailingslashit( $shortcode_url ) . 'page/%#%/',
+						'format'    => '',
+						'current'   => $paged,
+						'total'     => $course_query->max_num_pages,
+						'prev_text' => '&laquo; Previous',
+						'next_text' => 'Next &raquo;',
 					)
 				);
-			$courses_ouput .= '</div>';
+
+				$courses_ouput .= '</div>';
+			}
 		} else {
 			$courses_ouput .= '<div class="flms-course-pagination nothing-found flms-alert flms-primary flms-secondary-bg flms-secondary-border flms-flex">';
 				$courses_ouput .= apply_filters('flms_no_courses_found','Nothing found.');
