@@ -267,6 +267,17 @@ class FLMS_Course_Progress {
 				delete_user_meta($user_id, $meta_key);
 			}
 
+			//Remove exam restrictions
+			$meta_key = "flms_content_restricted_by_exam";
+			$meta_value = json_encode(
+				array(
+					'course' => "$course_id",
+					'exam' => "$exam",
+					'version' => "$version"
+				)
+			);
+			delete_user_meta($user_id, $meta_key, $meta_value);
+
 		}
 		$lessons = $course->get_lessons();
 		foreach($lessons as $lesson_id) {

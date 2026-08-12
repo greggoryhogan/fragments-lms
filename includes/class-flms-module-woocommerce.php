@@ -1203,9 +1203,6 @@ class FLMS_Module_Woocommerce {
      * Require accounts when purchasing a course
      */
     function filter_woocommerce_checkout_registration_required( $required ) {
-        if(!function_exists('get_cart')) {
-            return;
-        }
         // Several can be added, separated by a comma
         $product_ids = array ( 30, 813 );
         
@@ -2054,24 +2051,23 @@ class FLMS_Module_Woocommerce {
             //it's already required, we don't need to do anything
             return $registration_required;
         } else {
-            if(function_exists('get_cart')) {
-                $cart = WC()->cart;
-                foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-                    $product = wc_get_product($cart_item['data']);
-                    if($product !== false) {
-                        $type = $product->get_type();
-                        if($type == 'simple') {
-                            $product_id = $cart_item['product_id'];
-                            $courses = get_post_meta( $post->ID, 'flms_woocommerce_simple_course_ids', true );
-                            if($courses != '') {
-                                return true;
-                            }
-                        } else {
-                            $variation_id = $cart_item['variation_id'];
-                            $courses = get_post_meta( $variation_id, 'flms_woocommerce_variable_course_ids', true );
-                            if($courses != '') {
-                                return true;
-                            }
+            
+            $cart = WC()->cart;
+            foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+                $product = wc_get_product($cart_item['data']);
+                if($product !== false) {
+                    $type = $product->get_type();
+                    if($type == 'simple') {
+                        $product_id = $cart_item['product_id'];
+                        $courses = get_post_meta( $post->ID, 'flms_woocommerce_simple_course_ids', true );
+                        if($courses != '') {
+                            return true;
+                        }
+                    } else {
+                        $variation_id = $cart_item['variation_id'];
+                        $courses = get_post_meta( $variation_id, 'flms_woocommerce_variable_course_ids', true );
+                        if($courses != '') {
+                            return true;
                         }
                     }
                 }

@@ -3335,6 +3335,11 @@ class FLMS_Course_Manager {
 		if(isset($versions["{$source_version}"]["course_materials"])) {
 			$versions["{$active_version}"]["course_materials"] = $versions["{$source_version}"]["course_materials"];
 		}
+
+		//course tabs content
+		if(isset($versions["{$source_version}"]["course_tabs"])) {
+			$versions["{$active_version}"]["course_tabs"] = $versions["{$source_version}"]["course_tabs"];
+		}
 		
 		//make new versions for lessons
 		if(isset($versions["$source_version"]["course_lessons"])) {
