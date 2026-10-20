@@ -711,7 +711,7 @@ class FLMS_Reports {
                     );
                     $order_args = apply_filters('flms_royalty_reporting_order_args', $order_args);
                     $orders = wc_get_orders($order_args); 
-                    
+                    $calculation_type = apply_filters('flms_royalty_line_item_price_calculation_type', 'total');
                     //$response .= '<pre>'.print_r($orders, true).'</pre>';
                     if(!empty($orders)) {
                         $order_ct = 0;
@@ -735,7 +735,11 @@ class FLMS_Reports {
                                         if($group_seats > 0) {
                                             $quantity = $quantity * $group_seats;
                                         }
-                                        $subtotal = $item->get_subtotal();
+                                        if($calculation_type != 'total') {
+                                            $subtotal = $item->get_subtotal(); // full price
+                                        } else {
+                                            $subtotal = $item->get_total(); //discounted total
+                                        }
                                         $due = 0;
                                         $royalty = "$0";
                                         if($royalty_type == 'percentage') {

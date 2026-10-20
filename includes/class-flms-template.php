@@ -127,7 +127,7 @@ class FLMS_Template {
 					if(!$is_expired) {
 						if(apply_filters('flms_show_repurchase_link', true)) {
 							if($allow_repurchase) {
-								$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+								$message .= ' <button class="repurchase-link" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</button>';
 							}
 						}
 					}
@@ -136,7 +136,7 @@ class FLMS_Template {
 					if(!$is_expired) {
 						if($active_text != '') {
 							if($allow_repurchase) {
-								$message .= ' <a href="/#repurchase" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</a>';
+								$message .= ' <button class="repurchase-link" data-toggle-trigger="#purchase-again" data-toggle-text="'.$toggle_text.'">'.$active_text.'</button>';
 							}
 						}
 					}

@@ -1030,7 +1030,6 @@ function flms_enroll_course_button($post_id, $course_version, $version_index) {
 							if($status == 'archived') {
 								$nopurchase_text = 'This course is no longer available for purchase.';
 							} else {
-								echo $status;
 								$nopurchase_text = 'There are no options to purchase this course.';
 							}
 							$nopurchase_text = apply_filters('flms_no_purchase_text', $nopurchase_text, $status);
